@@ -1,0 +1,71 @@
+version: '3.9'
+
+services:
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    networks:
+      - appnet
+
+  gateway:
+    build: ./api-gateway
+    container_name: gateway
+    ports:
+      - "8000:8000"
+    depends_on:
+      - ingestion
+      - analysis
+      - prediction
+      - clustering
+    networks:
+      - appnet
+
+  ingestion:
+    build: ./ingestion-service
+    container_name: ingestion
+    ports:
+      - "5001:5001"
+    environment:
+      DATABASE_URL: postgresql://admin:admin@postgres:5432/mydb
+    networks:
+      - appnet
+
+  analysis:
+    build: ./analysis-service
+    container_name: analysis
+    ports:
+      - "5002:5002"
+    environment:
+      DATABASE_URL: postgres://admin:admin@postgres:5432/mydb
+    networks:
+      - appnet
+
+  prediction:
+    build: ./prediction-service
+    container_name: prediction
+    ports:
+      - "5003:5003"
+    environment:
+      DATABASE_URL: postgres://admin:admin@postgres:5432/mydb
+    networks:
+      - appnet
+
+  clustering:
+    build: ./clustering-service
+    container_name: clustering
+    ports:
+      - "5004:5004"
+    environment:
+      DATABASE_URL: postgres://admin:admin@postgres:5432/mydb
+    networks:
+      - appnet
+
+networks:
+  appnet:
+    driver: bridge
