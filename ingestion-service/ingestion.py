@@ -87,8 +87,7 @@ def create_tables():
                 timestamp TIMESTAMP NULL,
                 current_price DOUBLE PRECISION NULL,
                 market_cap BIGINT NULL,
-                total_volume BIGINT NULL,
-                UNIQUE (coin_id, timestamp)
+                total_volume BIGINT NULL
             );
         """)
 
