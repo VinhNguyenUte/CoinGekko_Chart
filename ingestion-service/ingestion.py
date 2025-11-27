@@ -87,7 +87,8 @@ def create_tables():
                 timestamp TIMESTAMP NULL,
                 current_price DOUBLE PRECISION NULL,
                 market_cap BIGINT NULL,
-                total_volume BIGINT NULL
+                total_volume BIGINT NULL,
+                UNIQUE (coin_id, timestamp)
             );
         """)
 
@@ -240,6 +241,7 @@ def save_history_data(coin_id, history):
                     INSERT INTO price_history (
                         coin_id, timestamp, current_price, market_cap, total_volume
                     ) VALUES (%s, %s, %s, %s, %s)
+                    ON CONFLICT (coin_id, timestamp) DO NOTHING;
                 """, (coin_id, ts, price, market_cap, total_vol))
             except Exception:
                 continue  # bỏ qua entry lỗi
