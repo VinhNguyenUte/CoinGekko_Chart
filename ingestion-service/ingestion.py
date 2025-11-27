@@ -12,9 +12,12 @@ from datetime import datetime
 # ------------------------
 # Config & Logging
 # ------------------------
+COINGECKO_API_KEY = "CG-wZsMMjrCVZLoEaYqRUxLjDrS"
+
 headers = {
-    "User-Agent": "Mozilla/5.0",
-    "Accept": "application/json"
+    "User-Agent": "Mozilla/5.0 (RateLimitTester)", 
+    "Accept": "application/json",
+    "x-cg-demo-api-key": COINGECKO_API_KEY 
 }
 
 logging.basicConfig(
