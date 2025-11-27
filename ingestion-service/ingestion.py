@@ -1,12 +1,12 @@
-import logging
-import os
-import time
-import requests
-import schedule
-import psycopg2
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
-from urllib.parse import urlparse
+import logging 
+import os 
+import time 
+import requests 
+import schedule 
+import psycopg2 
+from requests.adapters import HTTPAdapter 
+from urllib3.util.retry import Retry 
+from urllib.parse import urlparse 
 from datetime import datetime
 
 # ------------------------
@@ -32,37 +32,32 @@ session = requests.Session()
 retries = Retry(total=3, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
 session.mount("https://", HTTPAdapter(max_retries=retries))
 
+# ------------------------ #
+# CONNECT DB               #
+# ------------------------ #
+def get_db_connection():
+    try:
+        db_url = os.getenv("DATABASE_URL")
+        if not db_url:
+            logging.error("DATABASE_URL missing")
+            return None
 
-# ------------------------
-# DB Connection
-# ------------------------
-def get_db_connection(retry=10, wait=3):
-    db_url = os.getenv("DATABASE_URL")
-    if not db_url:
-        logging.error("DATABASE_URL missing")
+        parsed = urlparse(db_url)
+        return psycopg2.connect(
+            dbname=parsed.path.lstrip("/"),
+            user=parsed.username,
+            password=parsed.password,
+            host=parsed.hostname,
+            port=parsed.port,
+        )
+    except Exception as e:
+        logging.error("DB connect failed: %s", e)
         return None
 
-    parsed = urlparse(db_url)
-    for attempt in range(retry):
-        try:
-            conn = psycopg2.connect(
-                dbname=parsed.path.lstrip("/"),
-                user=parsed.username,
-                password=parsed.password,
-                host=parsed.hostname,
-                port=parsed.port,
-            )
-            return conn
-        except Exception as e:
-            logging.warning(f"DB connect failed (attempt {attempt + 1}/{retry}): {e}")
-            time.sleep(wait)
-    logging.error("Cannot connect to DB after retries")
-    return None
 
-
-# ------------------------
-# CREATE TABLE
-# ------------------------
+# ------------------------ #
+# CREATE TABLE             #
+# ------------------------ #
 def create_tables():
     conn = get_db_connection()
     if not conn:
@@ -72,16 +67,16 @@ def create_tables():
         cur = conn.cursor()
 
         cur.execute("""
-            CREATE TABLE IF NOT EXISTS coins ( 
+            CREATE TABLE IF NOT EXISTS coins (
                 id TEXT PRIMARY KEY,
-                symbol TEXT NULL,
-                name TEXT NULL,
-                market_cap_rank INT NULL,
-                last_updated TIMESTAMP NULL,
-                high_24h DOUBLE PRECISION NULL,
-                low_24h DOUBLE PRECISION NULL,
-                price_change_24h DOUBLE PRECISION NULL,
-                price_change_percentage_24h DOUBLE PRECISION NULL
+                symbol TEXT,
+                name TEXT,
+                market_cap_rank INT,
+                last_updated TIMESTAMP,
+                high_24h DOUBLE PRECISION,
+                low_24h DOUBLE PRECISION,
+                price_change_24h DOUBLE PRECISION,
+                price_change_percentage_24h DOUBLE PRECISION
             );
         """)
 
@@ -96,6 +91,51 @@ def create_tables():
             );
         """)
 
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS price_predictions (
+                id SERIAL PRIMARY KEY,
+                coin_id TEXT REFERENCES coins(id),
+                coin_name TEXT NULL,
+                predicted_price DOUBLE PRECISION NULL,
+                actual_price DOUBLE PRECISION NULL
+            );
+        """)
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS coin_clustered (
+                id SERIAL PRIMARY KEY,
+                coin_id TEXT REFERENCES coins(id),
+                timestamp TIMESTAMP,
+                current_price DOUBLE PRECISION,
+                market_cap BIGINT,
+                total_volume BIGINT,
+                percentage_change DOUBLE PRECISION,
+                volatility DOUBLE PRECISION,
+                momentum DOUBLE PRECISION,
+                cluster_label INT,
+                type TEXT
+            );
+        """)
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS price_history_weekly (
+                id SERIAL PRIMARY KEY,
+                coin_id TEXT REFERENCES coins(id),
+                week_start_date DATE,
+                weekly_avg_price DOUBLE PRECISION,
+                weekly_max_price DOUBLE PRECISION,
+                weekly_min_price DOUBLE PRECISION,
+                weekly_total_volume BIGINT,
+                weekly_avg_mkt_cap BIGINT
+            );
+        """)
+
+        cur.execute("""
+            DELETE FROM price_history
+            WHERE timestamp < NOW() - INTERVAL '30 days'
+        """)
+
+
         conn.commit()
         cur.close()
         logging.info("Tables ensured.")
@@ -106,9 +146,9 @@ def create_tables():
         conn.close()
 
 
-# ------------------------
-# FETCH DATA
-# ------------------------
+# ------------------------ #
+# FETCH TOP 5 COIN         #
+# ------------------------ #
 def fetch_top5_coins():
     try:
         resp = session.get(TOP_5_URL, timeout=15, headers=headers)
@@ -121,6 +161,9 @@ def fetch_top5_coins():
         return None
 
 
+# ------------------------ #
+# FETCH 30-DAY HISTORY     #
+# ------------------------ #
 def fetch_history(coin_id):
     try:
         url = HISTORY_URL.format(coin=coin_id)
@@ -132,9 +175,9 @@ def fetch_history(coin_id):
         return None
 
 
-# ------------------------
-# SAVE DATA
-# ------------------------
+# ------------------------ #
+# SAVE COIN METADATA       #
+# ------------------------ #
 def save_coin_info(coin):
     conn = get_db_connection()
     if not conn:
@@ -143,9 +186,10 @@ def save_coin_info(coin):
     try:
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO coins (id, symbol, name, market_cap_rank, last_updated,
-                high_24h, low_24h, price_change_24h, price_change_percentage_24h)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO coins (
+                id, symbol, name, market_cap_rank, last_updated,
+                high_24h, low_24h, price_change_24h, price_change_percentage_24h
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (id) DO UPDATE SET
                 market_cap_rank = EXCLUDED.market_cap_rank,
                 last_updated = EXCLUDED.last_updated,
@@ -154,19 +198,27 @@ def save_coin_info(coin):
                 price_change_24h = EXCLUDED.price_change_24h,
                 price_change_percentage_24h = EXCLUDED.price_change_percentage_24h;
         """, (
-            coin["id"], coin["symbol"], coin["name"], coin.get("market_cap_rank"),
-            coin.get("last_updated"), coin.get("high_24h"), coin.get("low_24h"),
-            coin.get("price_change_24h"), coin.get("price_change_percentage_24h")
+            coin["id"],
+            coin["symbol"],
+            coin["name"],
+            coin.get("market_cap_rank"),
+            coin.get("last_updated"),
+            coin.get("high_24h"),
+            coin.get("low_24h"),
+            coin.get("price_change_24h"),
+            coin.get("price_change_percentage_24h"),
         ))
         conn.commit()
         cur.close()
     except Exception as e:
         logging.error("Save coin info error: %s", e)
-        conn.rollback()
     finally:
         conn.close()
 
 
+# ------------------------ #
+# SAVE 30-DAY HISTORY      #
+# ------------------------ #
 def save_history_data(coin_id, history):
     if "prices" not in history:
         return
@@ -185,26 +237,24 @@ def save_history_data(coin_id, history):
                 total_vol = history["total_volumes"][i][1]
 
                 cur.execute("""
-                    INSERT INTO price_history 
-                    (coin_id, timestamp, current_price, market_cap, total_volume)
-                    VALUES (%s, %s, %s, %s, %s)
+                    INSERT INTO price_history (
+                        coin_id, timestamp, current_price, market_cap, total_volume
+                    ) VALUES (%s, %s, %s, %s, %s)
                 """, (coin_id, ts, price, market_cap, total_vol))
-            except Exception as e:
-                logging.warning(f"Skipped one history entry for {coin_id}: {e}")
-                continue
+            except Exception:
+                continue  # bỏ qua entry lỗi
 
         conn.commit()
         cur.close()
     except Exception as e:
         logging.error("Save 30-day history error: %s", e)
-        conn.rollback()
     finally:
         conn.close()
 
 
-# ------------------------
-# MAIN JOB
-# ------------------------
+# ------------------------ #
+# MAIN JOB                 #
+# ------------------------ #
 def job():
     logging.info("Job started")
     top5 = fetch_top5_coins()
@@ -216,15 +266,16 @@ def job():
         history = fetch_history(coin["id"])
         if history:
             save_history_data(coin["id"], history)
+
     logging.info("Job done")
 
 
-# ------------------------
-# MAIN LOOP
-# ------------------------
+# ------------------------ #
+# MAIN LOOP                #
+# ------------------------ #
 def main():
     create_tables()
-    logging.info("DATABASE_URL = %s", os.getenv("DATABASE_URL"))
+    print("DATABASE_URL =", os.getenv("DATABASE_URL"))
 
     schedule.every(CALL_INTERVAL_MINUTES).minutes.do(job)
     job()  # run immediately
