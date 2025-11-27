@@ -12,17 +12,28 @@ services:
       - "5432:5432"
     networks:
       - appnet
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d mydb"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+      
   gateway:
     build: ./api-gateway
     container_name: gateway
     ports:
       - "8000:8000"
     depends_on:
-      - ingestion
-      - analysis
-      - prediction
-      - clustering
+      postgres:
+        condition: service_healthy
+      ingestion:
+        condition: service_started
+      analysis:
+        condition: service_started
+      prediction:
+        condition: service_started
+      clustering:
+        condition: service_started
     networks:
       - appnet
 
@@ -33,6 +44,9 @@ services:
       - "5001:5001"
     environment:
       DATABASE_URL: postgresql://admin:admin@postgres:5432/mydb
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - appnet
 
@@ -43,6 +57,9 @@ services:
       - "5002:5002"
     environment:
       DATABASE_URL: postgres://admin:admin@postgres:5432/mydb
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - appnet
 
@@ -53,6 +70,9 @@ services:
       - "5003:5003"
     environment:
       DATABASE_URL: postgres://admin:admin@postgres:5432/mydb
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - appnet
 
@@ -63,6 +83,9 @@ services:
       - "5004:5004"
     environment:
       DATABASE_URL: postgres://admin:admin@postgres:5432/mydb
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - appnet
 
