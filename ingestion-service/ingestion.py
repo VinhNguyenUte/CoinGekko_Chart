@@ -27,7 +27,7 @@ logging.basicConfig(
 )
 
 TOP_5_URL = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,dogecoin,tether"
-HISTORY_URL = "https://api.coingecko.com/api/v3/coins/{coin}/market_chart?vs_currency=usd&days=30"
+HISTORY_URL = "https://api.coingecko.com/api/v3/coins/{coin}/market_chart?vs_currency=usd&days=180&interval=daily"
 CALL_INTERVAL_MINUTES = int(os.getenv("CALL_INTERVAL_MINUTES", "5"))
 
 # Retry session
