@@ -135,6 +135,11 @@ def create_tables():
         """)
 
         cur.execute("""
+            ALTER TABLE price_history_weekly
+            ADD CONSTRAINT unique_coin_week UNIQUE (coin_id, week_start_date)
+        """)
+
+        cur.execute("""
             DELETE FROM price_history
             WHERE timestamp < NOW() - INTERVAL '30 days'
         """)
