@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Market Analysis Dashboard</title>
+
+    <link rel="stylesheet" href="css/styles.css">
+
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+
+    <style>
+        .hidden {
+            display: none !important;
+        }
+
+        .view-section {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">◈</span>
+                    <span class="logo-text">CryptoLens</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul class="nav-list">
+                    <li class="nav-item active" id="nav-dashboard">
+                        <a href="#" class="nav-link">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                            </svg>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" id="nav-analysis">
+                        <a href="#" class="nav-link">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                            <span>Analysis</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path
+                                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                                </path>
+                            </svg>
+                            <span>Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="coin-list-section">
+                <h3 class="section-title">Watchlist</h3>
+                <ul class="coin-list">
+                    <li class="coin-item active" data-coin="BTC">
+                        <div class="coin-icon btc">₿</div>
+                        <div class="coin-info">
+                            <span class="coin-name">Bitcoin</span>
+                            <span class="coin-symbol">BTC</span>
+                        </div>
+                        <div class="coin-change positive">+2.4%</div>
+                    </li>
+                    <li class="coin-item" data-coin="ETH">
+                        <div class="coin-icon eth">Ξ</div>
+                        <div class="coin-info">
+                            <span class="coin-name">Ethereum</span>
+                            <span class="coin-symbol">ETH</span>
+                        </div>
+                        <div class="coin-change positive">+1.8%</div>
+                    </li>
+                    <li class="coin-item" data-coin="BNB">
+                        <div class="coin-icon bnb">◆</div>
+                        <div class="coin-info">
+                            <span class="coin-name">BNB</span>
+                            <span class="coin-symbol">BNB</span>
+                        </div>
+                        <div class="coin-change negative">-0.5%</div>
+                    </li>
+                    <li class="coin-item" data-coin="SOL">
+                        <div class="coin-icon sol">◎</div>
+                        <div class="coin-info">
+                            <span class="coin-name">Solana</span>
+                            <span class="coin-symbol">SOL</span>
+                        </div>
+                        <div class="coin-change positive">+5.2%</div>
+                    </li>
+                    <li class="coin-item" data-coin="USDT">
+                        <div class="coin-icon usdt">₮</div>
+                        <div class="coin-info">
+                            <span class="coin-name">Tether</span>
+                            <span class="coin-symbol">USDT</span>
+                        </div>
+                        <div class="coin-change neutral">0.0%</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="market-status">
+                    <span class="status-dot"></span>
+                    <span>Market Open</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-dashboard">
+
+            <div id="view-dashboard" class="view-section">
+                <section class="market-view-section">
+                    <div class="heatmap-container">
+                        <div id="correlation-heatmap" class="chart-placeholder"></div>
+                    </div>
+                </section>
+
+                <section class="stats-section" style="margin-top: 20px;">
+                </section>
+            </div>
+
+            <div id="view-analysis" class="view-section hidden">
+                <section class="detail-analysis-section">
+
+                    <div class="detail-header">
+                        <div class="coin-detail-info">
+                            <div class="coin-avatar btc">₿</div>
+                            <div class="coin-detail-text">
+                                <h1 class="coin-title">Bitcoin</h1>
+                                <span class="coin-ticker">BTC/USDT</span>
+                            </div>
+                        </div>
+                        <div class="price-info">
+                            <span class="current-price">$0.00</span>
+                            <span class="price-change positive">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="change-icon">
+                                    <polyline points="18 15 12 9 6 15"></polyline>
+                                </svg>
+                                +$0.00 (0.00%)
+                            </span>
+                        </div>
+                        <div class="signal-cards">
+                            <div class="signal-card buy">
+                                <span class="signal-label">Signal</span>
+                                <span class="signal-value">HOLD</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="analysis-charts-layout">
+
+                        <div class="chart-card full-width">
+                            <div class="chart-header">
+                                <h3 class="chart-title">1. Price Trend & Prediction (with RSI)</h3>
+                                <div class="chart-legend">
+                                    <span class="legend-item price"><span class="legend-dot"></span>Price</span>
+                                    <span class="legend-item dpo"><span class="legend-dot"></span>Forecast</span>
+                                </div>
+                            </div>
+                            <div id="price-trend-chart" class="chart-placeholder large-height"></div>
+                        </div>
+
+                        <div class="chart-card full-width">
+                            <div class="chart-header">
+                                <h3 class="chart-title">2. Volume vs Returns Correlation</h3>
+                            </div>
+                            <div id="scatter-plot" class="chart-placeholder medium-height"></div>
+                        </div>
+
+                        <div class="chart-card full-width">
+                            <div class="chart-header">
+                                <h3 class="chart-title">3. Risk Distribution (Histogram)</h3>
+                            </div>
+                            <div id="risk-histogram" class="chart-placeholder medium-height"></div>
+                        </div>
+
+                        <div class="chart-card full-width">
+                            <div class="chart-header">
+                                <h3 class="chart-title">4. Seasonal Cycle (DPO Analysis)</h3>
+                            </div>
+                            <div id="seasonal-chart" class="chart-placeholder medium-height"></div>
+                        </div>
+
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+
+</html>
