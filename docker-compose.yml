@@ -1,4 +1,3 @@
-version: '3.9'
 
 services:
 
@@ -47,6 +46,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+        
     networks:
       - appnet
 
@@ -84,10 +85,20 @@ services:
     environment:
       DATABASE_URL: postgres://admin:admin@postgres:5432/mydb
     depends_on:
+    
       postgres:
         condition: service_healthy
     networks:
       - appnet
+
+  database-api:
+    build: ./database-api
+    container_name: database-api
+    depends_on:
+      - postgres
+    ports:
+      - "8002:8002"
+
 
 networks:
   appnet:
