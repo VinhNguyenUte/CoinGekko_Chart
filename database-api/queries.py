@@ -2,7 +2,7 @@ from db import get_connection
 
 from models.PricePrediction import PricePrediction
 from models.CoinClustered import CoinClustered
-from models.PriceHistoryWeekly import PriceHistoryWeekly
+from models.PriceResampling import PriceResampling
 
 
 # -----------------------------
@@ -39,7 +39,7 @@ def get_price_predictions():
 def get_clustered_data():
     conn = get_connection()
     cur = conn.cursor()
-
+    print("Fetching clustered data from database...")
     cur.execute("""
         SELECT id, coin_id, timestamp, current_price, market_cap,
                total_volume, percentage_change, volatility,
@@ -68,35 +68,32 @@ def get_clustered_data():
         for r in rows
     ]
 
-
 # -----------------------------
-# PRICE HISTORY WEEKLY
+# PRICE RESAMPLING 
 # -----------------------------
-def get_weekly_history():
+def get_price_resampling():
     conn = get_connection()
     cur = conn.cursor()
-
+    print("Fetching resampling data from database...")
     cur.execute("""
-        SELECT id, coin_id, week_start_date, weekly_avg_price,
-               weekly_max_price, weekly_min_price,
-               weekly_total_volume, weekly_avg_mkt_cap
-        FROM price_history_weekly
-        ORDER BY week_start_date ASC
+        SELECT id, coin_id, timestamp, current_price,price_max, price_min,
+               market_cap, total_volume, type
+        FROM price_resampling
+        ORDER BY timestamp ASC
     """)
-
     rows = cur.fetchall()
     conn.close()
-
     return [
-        PriceHistoryWeekly(
+        PriceResampling(
             id=r[0],
             coin_id=r[1],
-            week_start_date=r[2],
-            weekly_avg_price=r[3],
-            weekly_max_price=r[4],
-            weekly_min_price=r[5],
-            weekly_total_volume=r[6],
-            weekly_avg_mkt_cap=r[7]
+            timestamp=r[2],
+            current_price=r[3],
+            price_max=r[4],
+            price_min=r[5],
+            market_cap=r[6],
+            total_volume=r[7],
+            type=r[8]
         )
         for r in rows
     ]

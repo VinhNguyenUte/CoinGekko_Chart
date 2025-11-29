@@ -1,1 +1,6 @@
-flask
+# analysis-service/requirements.txt
+psycopg2-binary
+pandas
+sqlalchemy
+APScheduler
+sqlalchemy

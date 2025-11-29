@@ -3,8 +3,9 @@ import psycopg2
 from urllib.parse import urlparse
 
 def get_connection():
+    print("Getting DB connection...")
     db_url = os.getenv("DATABASE_URL")
-
+    print("DATABASE_URL:", db_url)
     if not db_url:
         raise Exception("DATABASE_URL not found")
 
@@ -17,5 +18,5 @@ def get_connection():
         host=parsed.hostname,
         port=parsed.port
     )
-
+    print("DB connection established.")
     return conn

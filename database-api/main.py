@@ -4,12 +4,12 @@ from typing import List
 from queries import (
     get_price_predictions,
     get_clustered_data,
-    get_weekly_history
+    get_price_resampling
 )
 
 from models.PricePrediction import PricePrediction
 from models.CoinClustered import CoinClustered
-from models.PriceHistoryWeekly import PriceHistoryWeekly
+from models.PriceResampling import PriceResampling
 
 app = FastAPI()
 
@@ -35,8 +35,9 @@ def api_coin_clustered():
 
 
 # --------------------------------------------------------
-# API: WEEKLY HISTORY
+# API:PRICE HISTORY 
 # --------------------------------------------------------
-@app.get("/price-history-weekly", response_model=List[PriceHistoryWeekly])
-def api_price_history_weekly():
-    return get_weekly_history()
+@app.get("/price-resampling", response_model=List[PriceResampling])
+def api_price_resampling():
+    return get_price_resampling()
+
