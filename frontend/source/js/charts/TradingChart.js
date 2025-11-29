@@ -77,12 +77,8 @@ class TradingChart {
         // =============================================
         const layout = {
             dragmode: 'pan',
-            
-            // 1. Hiển thị Marker trên TẤT CẢ các line cùng lúc
+                    
             hovermode: 'x unified', 
-
-            hoverdistance: 100, // Tăng phạm vi bắt điểm
-            spikedistance: 100, // Tăng phạm vi hiện đường kẻ
             
             hoverlabel: {
                 bgcolor: "rgba(37, 45, 61, 0.95)", 
@@ -101,8 +97,6 @@ class TradingChart {
                 spikecolor: '#ff0000ff',      
                 spikedash: 'dot',          
                 spikemode: 'across', 
-                
-                // Trục dọc thì đi theo con trỏ chuột cho mượt
                 spikesnap: 'cursor',        
                 
                 showline: false,            
@@ -120,10 +114,7 @@ class TradingChart {
                 spikethickness: 1,
                 spikecolor: '#ff0000ff',
                 spikedash: 'dot',
-                spikemode: 'across', // Kẻ xuyên suốt sang phải
-                
-                // [SỬA QUAN TRỌNG]: Đổi từ 'cursor' sang 'data'
-                // Để đường kẻ ngang tự động hít vào đường line gần nhất
+                spikemode: 'across',
                 spikesnap: 'data',   
                 
                 showline: false,
@@ -165,9 +156,8 @@ class TradingChart {
         });
     }
 
-    // (Giữ nguyên phần setupInteractiveLegends của bạn)
+
     static setupInteractiveLegends(graphDiv, data, indicators) {
-        // ... (Code cũ của bạn giữ nguyên, không cần sửa) ...
         const legendContainer = document.getElementById("price-legend");
         const lastData = data[data.length - 1];
 

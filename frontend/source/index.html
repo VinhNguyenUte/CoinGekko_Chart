@@ -76,17 +76,19 @@
         <main class="main-content">
             <!-- Dashboard Page -->
             <div id="dashboard-page" class="page active">
-                <div class="chart-header">
-                    <div class="header-title">
-                        <h1>Correlation Heatmap Dashboard</h1>
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <div class="header-title">
+                            <h1>Correlation Heatmap Dashboard</h1>
+                        </div>
+                        <div class="header-toolbar">
+                            <button class="timeframe-btn active" data-timeframe="1w">1 Week</button>
+                            <button class="timeframe-btn" data-timeframe="1m">1 Month</button>
+                        </div>
                     </div>
-                    <div class="header-toolbar">
-                        <button class="timeframe-btn active" data-timeframe="1w">1 Week</button>
-                        <button class="timeframe-btn" data-timeframe="1m">1 Month</button>
+                    <div class="chart-container">
+                        <div id="correlation-heatmap" class="chart-wrapper"></div>
                     </div>
-                </div>
-                <div class="chart-container">
-                    <div id="correlation-heatmap" class="chart-wrapper"></div>
                 </div>
             </div>
 
@@ -144,7 +146,8 @@
                 </div>
 
                 <div class="chart-box">
-                    <div class="chart-section" style="height: 400px;"> <div class="section-header">
+                    <div class="chart-section" style="height: 400px;">
+                        <div class="section-header">
                             <h3>Seasonal Cycle (DPO)</h3>
                         </div>
                         <div id="seasonal-chart" class="chart-wrapper"></div>

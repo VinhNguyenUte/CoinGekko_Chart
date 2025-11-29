@@ -127,7 +127,6 @@ class App {
     const timeframe = activeFilter ? activeFilter.dataset.timeframe : "1w"
     const matrixKey = `correlations_${timeframe}`
     
-    // Check nếu chưa có data (trường hợp load lỗi hoặc chưa xong)
     if (!this.data[matrixKey]) return;
 
     DashboardChart.renderCorrelationHeatmap(this.data[matrixKey])

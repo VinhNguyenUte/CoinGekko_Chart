@@ -27,17 +27,20 @@ class SeasonalChart {
             
             dragmode: 'pan', 
             
-            // [QUAN TRỌNG] Đổi sang 'closest' để Crosshair hoạt động tự do theo chuột
-            hovermode: "closest", 
+            // 1. [QUAN TRỌNG] Đồng bộ kiểu hover
+            hovermode: "x unified", 
+            hoverdistance: 100,
+            spikedistance: 100,
 
+            // 2. Xóa viền Tooltip
             hoverlabel: {
-                bgcolor: "#252d3d",
-                bordercolor: "#2a3548",
+                bgcolor: "rgba(37, 45, 61, 0.95)",
+                bordercolor: "transparent", // Xóa viền trắng
                 font: { color: "#e3e8ef", size: 12 },
                 namelength: 0
             },
 
-            // Trục X (Đường dọc)
+            // --- TRỤC X (Kẻ Dọc) ---
             xaxis: { 
                 showgrid: true, 
                 gridcolor: '#2a3548',
@@ -45,42 +48,52 @@ class SeasonalChart {
                 
                 // Cấu hình đường gióng dọc
                 showspikes: true, 
-                spikethickness: 1,       // [FIX] Phải là số nguyên >= 1
-                spikecolor: '#ffffff',   // Màu trắng
-                spikedash: 'dash',       // Nét đứt
+                spikethickness: 1,       
+                spikecolor: '#666666',   // Màu xám
+                spikedash: 'dot',        // Chấm bi
                 spikemode: 'across',
-                spikesnap: 'cursor',     // Dính theo con trỏ chuột
+                spikesnap: 'cursor',     // Dọc theo chuột
+                
+                showline: false,
+                showspikelabels: true,
+                spikelabelfont: {size: 10, color: '#e3e8ef'},
+                hoverformat: '%b %d'
             },
 
-            // Trục Y (Đường ngang)
+            // --- TRỤC Y (Kẻ Ngang) ---
             yaxis: { 
                 title: "Deviation ($)", 
                 showgrid: true, 
                 gridcolor: '#2a3548',
-                zeroline: false,
+                zeroline: false, // Tắt zeroline mặc định để vẽ shape đẹp hơn
                 
                 // Cấu hình đường gióng ngang
                 showspikes: true,
-                spikethickness: 1,       // [FIX] Phải là số nguyên >= 1
-                spikecolor: '#ffffff',   // Màu trắng (để red nếu muốn test)
-                spikedash: 'dash',       // Nét đứt
+                spikethickness: 1,       
+                spikecolor: '#666666',   // Màu xám
+                spikedash: 'dot',        // Chấm bi
                 spikemode: 'across',
-                spikesnap: 'cursor',     // Dính theo con trỏ chuột
+                spikesnap: 'data',       // [QUAN TRỌNG] Bám vào đường DPO
+                
+                showline: false,
+                showspikelabels: true,
+                spikelabelfont: {size: 10, color: '#e3e8ef'},
             },
 
             margin: { l: 50, r: 20, t: 40, b: 40 },
             paper_bgcolor: "transparent",
             plot_bgcolor: "transparent",
             font: { color: "#e3e8ef" },
+            showlegend: false,
 
-            // Đường Zero Line cố định
+            // Đường Zero Line cố định (Màu trắng mờ ở giữa)
             shapes: [
                 {
                     type: "line",
                     xref: "paper", x0: 0, x1: 1,
                     yref: "y", y0: 0, y1: 0,
                     line: { 
-                        color: "rgba(255, 255, 255, 0.5)", 
+                        color: "rgba(255, 255, 255, 0.3)", 
                         width: 1, 
                         dash: "dash" 
                     },
