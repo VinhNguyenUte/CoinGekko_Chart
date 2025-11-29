@@ -27,8 +27,8 @@ class App {
       ApiService.getCoinHistory("ethereum"),
       ApiService.getCoinHistory("bnb"),
       ApiService.getCoinHistory("solana"),
-      ApiService.getCorrelationMatrix("1w"),
-      ApiService.getCorrelationMatrix("1m"),
+      ApiService.getCorrelationMatrix("week"),
+      ApiService.getCorrelationMatrix("month"),
     ])
 
     this.data.bitcoin = btc
@@ -133,15 +133,18 @@ class App {
   }
 
   renderAnalysisPage() {
-    const data = this.data[this.currentCoin]
-    if (!data) return;
+    const apiData = this.data[this.currentCoin]
+    if (!apiData) return;
 
     const coinNames = { bitcoin: "Bitcoin", ethereum: "Ethereum", bnb: "BNB", solana: "Solana" }
     document.getElementById("coin-name").textContent = coinNames[this.currentCoin] || "Bitcoin"
     document.getElementById("current-price").textContent = `$${data[data.length - 1].price.toLocaleString()}`
 
+    const latestPrice = apiData.lineData.prices[apiData.lineData.prices.length - 1];
+    document.getElementById("current-price").textContent = `$${latestPrice.toLocaleString()}`;
+
     // Render Main Chart
-    TradingChart.render(data, this.indicators);
+    TradingChart.render(apiData.lineData, this.indicators);
     
     // Render 3 Chart nhỏ
     VolumePriceChart.render(data)

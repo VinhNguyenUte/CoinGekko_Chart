@@ -1,75 +1,84 @@
 class DashboardChart {
     static renderCorrelationHeatmap(matrix) {
-      const textValues = matrix.correlations.map(row => row.map(val => val.toFixed(2)));
+        // 1. Kiểm tra an toàn: Nếu API chưa trả về data hoặc lỗi, thì không vẽ để tránh crash trang
+        if (!matrix || !matrix.correlations || !matrix.coins) {
+            console.warn("DashboardChart: No matrix data available to render.");
+            return;
+        }
 
-      const trace = {
-        z: matrix.correlations,
-        x: matrix.coins,
-        y: matrix.coins,
-        type: "heatmap",
-        
-        colorscale: "RdBu",
-        reversescale: false,
-        zmid: 0,
-        zmin: -1,
-        zmax: 1,
+        // 2. Format giá trị hiển thị (2 số thập phân)
+        const textValues = matrix.correlations.map(row => row.map(val => val.toFixed(2)));
 
-        text: textValues,
-        texttemplate: "%{text}",
-        textfont: {
-            family: "Roboto, sans-serif",
-            size: 12,
-            color: "auto"
-        },
+        const trace = {
+            z: matrix.correlations,
+            x: matrix.coins,
+            y: matrix.coins,
+            type: "heatmap",
+            
+            // Dải màu: Đỏ (1) -> Trắng (0) -> Xanh (-1)
+            colorscale: "RdBu",
+            reversescale: false, // Đỏ là dương (nóng), Xanh là âm (lạnh)
+            zmid: 0,
+            zmin: -1,
+            zmax: 1,
 
-        xgap: 2, 
-        ygap: 2,
+            text: textValues,
+            texttemplate: "%{text}",
+            textfont: {
+                family: "Roboto, sans-serif",
+                size: 12,
+                color: "auto" // Plotly tự chọn màu chữ trắng/đen tùy nền
+            },
 
-        hovertemplate: "<b>%{y} - %{x}</b><br>Correlation: %{z:.2f}<extra></extra>",
-        
-        // Thanh màu bên phải
-        colorbar: { 
-            thickness: 15, 
-            len: 0.9,
-            tickfont: { color: "#ffffffff" },
-            titlefont: { color: "#ffffffff" }
-        },
-      }
+            xgap: 2, 
+            ygap: 2,
+
+            hovertemplate: "<b>%{y} - %{x}</b><br>Correlation: %{z:.2f}<extra></extra>",
+            
+            // Thanh màu bên phải
+            colorbar: { 
+                thickness: 15, 
+                len: 0.9,
+                tickfont: { color: "#e3e8ef" },
+                titlefont: { color: "#e3e8ef" }
+            },
+        }
   
-      const layout = {
-        title: { 
-            text: "Correlation Heatmap", 
-            x: 0.02,
-            font: { size: 18, color: "#e3e8ef" }
-        },
-        margin: { l: 60, r: 50, t: 60, b: 60 },
-        paper_bgcolor: "#1a1f2e", // Màu nền biểu đồ
-        plot_bgcolor: "#ffffffff",  // Màu nền khung
-        
-        // Cấu hình trục X
-        xaxis: { 
-            side: "bottom", 
-            tickfont: { color: "#e3e8ef", size: 12 },
-            showgrid: false, // Tắt lưới vì đã có xgap
-            fixedrange: true // Tắt zoom
-        },
+        const layout = {
+            title: { 
+                text: "Correlation Heatmap", 
+                x: 0.02,
+                font: { size: 18, color: "#e3e8ef" }
+            },
+            margin: { l: 60, r: 50, t: 60, b: 60 },
+            paper_bgcolor: "#1a1f2e", // Màu nền card
+            plot_bgcolor: "transparent",
+            
+            // Cấu hình trục X
+            xaxis: { 
+                side: "bottom", 
+                tickfont: { color: "#e3e8ef", size: 12 },
+                showgrid: false,
+                fixedrange: true // Tắt zoom
+            },
 
-        // Cấu hình trục Y
-        yaxis: { 
-            autorange: "reversed", // Đảo chiều trục Y để giống ma trận (Dòng 1 ở trên cùng)
-            tickfont: { color: "#e3e8ef", size: 12 },
-            showgrid: false,
-            fixedrange: true
-        },
-        
-        font: { color: "#e3e8ef" }
-      }
+            // Cấu hình trục Y
+            yaxis: { 
+                autorange: "reversed", // Đảo chiều để coin đầu tiên nằm trên cùng
+                tickfont: { color: "#e3e8ef", size: 12 },
+                showgrid: false,
+                fixedrange: true
+            },
+            
+            font: { color: "#e3e8ef" }
+        }
   
-      const config = {
-        responsive: true,
-        displayModeBar: false // Ẩn thanh công cụ hover
-      }
+        const config = {
+            responsive: true,
+            displayModeBar: false // Ẩn thanh công cụ hover cho gọn
+        }
 
-      Plotly.newPlot("correlation-heatmap", [trace], layout, config)
+        // Vẽ biểu đồ vào div có id="correlation-heatmap"
+        Plotly.newPlot("correlation-heatmap", [trace], layout, config);
     }
 }
