@@ -1,796 +1,617 @@
-/* ========================================
-   CSS RESET & BASE STYLES
-======================================== */
-*,
-*::before,
-*::after {
+/* ============ RESET & VARIABLES ============ */
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
 :root {
-  /* Color Palette - Dark Theme */
-  --bg-primary: #0a0e17;
-  --bg-secondary: #0f1419;
-  --bg-tertiary: #151c28;
-  --bg-card: #1a2332;
-  --bg-hover: #1f2937;
-
-  /* Accent Colors */
-  --neon-green: #00ff88;
-  --neon-green-dim: #00cc6a;
-  --neon-red: #ff3366;
-  --neon-red-dim: #cc2952;
-  --neon-blue: #00d4ff;
-  --neon-purple: #a855f7;
-  --neon-yellow: #fbbf24;
-
-  /* Text Colors */
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-
-  /* Border Colors */
-  --border-color: #1e293b;
-  --border-focus: #334155;
-
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
-  --shadow-glow-green: 0 0 20px rgba(0, 255, 136, 0.2);
-  --shadow-glow-red: 0 0 20px rgba(255, 51, 102, 0.2);
-
-  /* Spacing */
-  --sidebar-width: 260px;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --bg-primary: #0f1419;
+  --bg-secondary: #1a1f2e;
+  --bg-tertiary: #252d3d;
+  --text-primary: #e3e8ef;
+  --text-secondary: #8892a0;
+  --border-color: #2a3548;
+  --accent-green: #00d084;
+  --accent-red: #ff5766;
+  --accent-blue: #4a7cff;
+  --accent-orange: #ff9500;
+  --accent-purple: #a855f7;
 }
 
-html {
-  font-size: 16px;
-}
-
+html,
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
-  background-color: var(--bg-primary);
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg-primary);
   color: var(--text-primary);
-  line-height: 1.5;
-  min-height: 100vh;
-  overflow-x: hidden;
+  overflow: hidden; /* Ngăn cuộn ở body, chỉ cuộn ở main-content */
 }
 
-/* ========================================
-   DASHBOARD LAYOUT
-======================================== */
-.dashboard-container {
+.app-container {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
-
-/* ========================================
-   SIDEBAR STYLES
-======================================== */
+/* ============ SIDEBAR ============ */
 .sidebar {
-  width: var(--sidebar-width);
-  background-color: var(--bg-secondary);
+  width: 280px;
+  background: var(--bg-secondary);
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  position: fixed;
-  height: 100vh;
-  left: 0;
-  top: 0;
-  z-index: 100;
+  overflow-y: auto;
+  padding: 16px 0;
+  flex-shrink: 0; /* Không bị co lại khi màn hình nhỏ */
 }
 
 .sidebar-header {
-  padding: 20px;
+  padding: 0 16px 20px;
   border-bottom: 1px solid var(--border-color);
+  margin-bottom: 16px;
 }
 
 .logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.logo-icon {
-  font-size: 28px;
-  color: var(--neon-green);
-  text-shadow: 0 0 10px var(--neon-green);
-}
-
-.logo-text {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
-  letter-spacing: -0.5px;
-}
-
-/* Navigation */
-.sidebar-nav {
-  padding: 16px 12px;
-}
-
-.nav-list {
-  list-style: none;
-}
-
-.nav-item {
-  margin-bottom: 4px;
-}
-
-.nav-link {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  color: var(--text-secondary);
-  text-decoration: none;
-  border-radius: var(--radius-md);
-  transition: all 0.2s ease;
-}
-
-.nav-link:hover {
-  background-color: var(--bg-hover);
-  color: var(--text-primary);
-}
-
-.nav-item.active .nav-link {
-  background-color: rgba(0, 255, 136, 0.1);
-  color: var(--neon-green);
-}
-
-.nav-icon {
-  width: 20px;
-  height: 20px;
-}
-
-/* Coin List */
-.coin-list-section {
-  flex: 1;
-  padding: 16px 12px;
-  overflow-y: auto;
-}
-
-.section-title {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
+  color: var(--accent-green);
   letter-spacing: 1px;
-  color: var(--text-muted);
-  padding: 0 16px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 12px;
   margin-bottom: 12px;
 }
 
-.coin-list {
-  list-style: none;
-}
-
-.coin-item {
+.nav-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  border-radius: var(--radius-md);
+  padding: 12px 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
-  margin-bottom: 4px;
+  border-radius: 6px;
+  transition: all 0.2s;
 }
 
-.coin-item:hover {
-  background-color: var(--bg-hover);
+.nav-item:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
-.coin-item.active {
-  background-color: var(--bg-card);
-  border: 1px solid var(--border-focus);
+.nav-item.active {
+  background: var(--bg-tertiary);
+  color: var(--accent-green);
+  border-left: 3px solid var(--accent-green);
+}
+
+.nav-icon {
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 12px 0;
+}
+
+/* ============ WATCHLIST ============ */
+.watchlist-section {
+  flex: 1;
+  padding: 0 12px;
+}
+
+.watchlist-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+  padding: 0 4px 12px;
+  text-transform: uppercase;
+}
+
+.watchlist-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.watchlist-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.watchlist-item:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--accent-blue);
+}
+
+.watchlist-item.active {
+  background: var(--bg-tertiary);
+  border-color: var(--accent-green);
 }
 
 .coin-icon {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  color: white;
   font-weight: 700;
-  font-size: 16px;
-}
-
-.coin-icon.btc {
-  background: linear-gradient(135deg, #f7931a, #ffb74d);
-  color: #000;
-}
-.coin-icon.eth {
-  background: linear-gradient(135deg, #627eea, #8fa8f8);
-  color: #fff;
-}
-.coin-icon.bnb {
-  background: linear-gradient(135deg, #f3ba2f, #ffd54f);
-  color: #000;
-}
-.coin-icon.sol {
-  background: linear-gradient(135deg, #9945ff, #14f195);
-  color: #fff;
-}
-.coin-icon.usdt {
-  background: linear-gradient(135deg, #26a17b, #4cceac);
-  color: #fff;
+  font-size: 14px;
+  flex-shrink: 0;
 }
 
 .coin-info {
   flex: 1;
-  display: flex;
-  flex-direction: column;
+  min-width: 0;
 }
 
 .coin-name {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
 .coin-symbol {
-  font-size: 12px;
-  color: var(--text-muted);
+  font-size: 11px;
+  color: var(--text-secondary);
 }
 
 .coin-change {
   font-size: 12px;
   font-weight: 600;
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
+  white-space: nowrap;
 }
 
 .coin-change.positive {
-  color: var(--neon-green);
-  background-color: rgba(0, 255, 136, 0.1);
+  color: var(--accent-green);
 }
 
 .coin-change.negative {
-  color: var(--neon-red);
-  background-color: rgba(255, 51, 102, 0.1);
+  color: var(--accent-red);
 }
 
-.coin-change.neutral {
-  color: var(--text-secondary);
-  background-color: var(--bg-tertiary);
-}
-
-/* Sidebar Footer */
-.sidebar-footer {
-  padding: 16px 20px;
-  border-top: 1px solid var(--border-color);
-}
-
-.market-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--neon-green);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-/* ========================================
-   MAIN DASHBOARD
-======================================== */
-.main-dashboard {
+/* ============ MAIN CONTENT & SCROLLING ============ */
+.main-content {
   flex: 1;
-  margin-left: var(--sidebar-width);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  max-width: calc(100vw - var(--sidebar-width));
-}
-
-/* ========================================
-   MARKET VIEW SECTION (Heatmap)
-======================================== */
-.market-view-section {
-  background-color: var(--bg-card);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  padding: 24px;
-  box-shadow: var(--shadow-md);
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.section-heading {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.filter-controls {
-  display: flex;
-  gap: 16px;
-}
-
-.select-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.select-wrapper label {
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-muted);
-}
-
-.custom-select {
-  background-color: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  padding: 8px 32px 8px 12px;
-  font-size: 14px;
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  transition: all 0.2s ease;
-}
-
-.custom-select:hover {
-  border-color: var(--border-focus);
-}
-
-.custom-select:focus {
-  outline: none;
-  border-color: var(--neon-blue);
-  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
-}
-
-.heatmap-container {
-  background-color: var(--bg-tertiary);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  min-height: 320px;
-}
-
-/* ========================================
-   DETAIL ANALYSIS SECTION
-======================================== */
-.detail-analysis-section {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.detail-header {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  background-color: var(--bg-card);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  padding: 20px 24px;
-  flex-wrap: wrap;
-  justify-content: space-between;
-}
-
-.header-left, .header-right {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-}
-
-/* Style cho dropdown bộ lọc ở trang Analysis */
-.analysis-controls .custom-select {
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--neon-blue); /* Viền xanh cho nổi */
-    color: var(--text-primary);
-    padding: 10px 16px;
-    font-weight: 600;
-}
-
-.coin-detail-info {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.coin-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  font-weight: 700;
-}
-
-.coin-avatar.btc {
-  background: linear-gradient(135deg, #f7931a, #ffb74d);
-  color: #000;
-}
-
-.coin-detail-text {
+  /* Đây là nơi duy nhất xử lý scroll dọc cho nội dung chính */
+  overflow-y: auto; 
+  background: var(--bg-primary);
   display: flex;
   flex-direction: column;
 }
 
-.coin-title {
-  font-size: 24px;
-  font-weight: 700;
+.page {
+  display: none;
+  /* Bỏ overflow-y: auto ở đây để tránh scroll lồng nhau */
+  padding: 16px 24px;
+  /* Thêm khoảng trống dưới cùng để scroll thoải mái */
+  padding-bottom: 50px; 
 }
 
-.coin-ticker {
-  font-size: 14px;
-  color: var(--text-muted);
+.page.active {
+  display: block; /* Dùng block thay vì flex để content chảy dọc tự nhiên */
+  animation: fadeIn 0.3s ease;
 }
 
-.price-info {
-  display: flex;
-  flex-direction: column;
-  margin-left: auto;
-  text-align: right;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.current-price {
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.price-change {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.price-change.positive {
-  color: var(--neon-green);
-}
-
-.price-change.negative {
-  color: var(--neon-red);
-}
-
-.change-icon {
-  width: 16px;
-  height: 16px;
-}
-
-.signal-cards {
-  display: flex;
-  gap: 12px;
-  margin-left: 24px;
-}
-
-.signal-card {
-  display: flex;
-  flex-direction: column;
-  padding: 12px 20px;
-  border-radius: var(--radius-md);
-  min-width: 120px;
-}
-
-.signal-card.buy {
-  background-color: rgba(0, 255, 136, 0.1);
-  border: 1px solid rgba(0, 255, 136, 0.3);
-}
-
-.signal-card.sell {
-  background-color: rgba(255, 51, 102, 0.1);
-  border: 1px solid rgba(255, 51, 102, 0.3);
-}
-
-.signal-card.neutral {
-  background-color: rgba(251, 191, 36, 0.1);
-  border: 1px solid rgba(251, 191, 36, 0.3);
-}
-
-.signal-card.info {
-  background-color: rgba(0, 212, 255, 0.1);
-  border: 1px solid rgba(0, 212, 255, 0.3);
-}
-
-.signal-label {
-  font-size: 10px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-muted);
-  margin-bottom: 4px;
-}
-
-.signal-value {
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.signal-card.buy .signal-value {
-  color: var(--neon-green);
-}
-.signal-card.sell .signal-value {
-  color: var(--neon-red);
-}
-.signal-card.neutral .signal-value {
-  color: var(--neon-yellow);
-}
-.signal-card.info .signal-value {
-  color: var(--neon-blue);
-}
-
-/* ========================================
-   CHARTS GRID
-======================================== */
-.chart-card {
-  background-color: var(--bg-card);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  padding: 20px;
-  box-shadow: var(--shadow-md);
-  position: relative;
-}
-
+/* ============ DASHBOARD PAGE ============ */
 .chart-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+}
+
+.header-title h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.coin-price {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+#current-price {
+  color: var(--text-primary);
+}
+
+#price-change {
+  font-size: 16px;
+}
+
+.header-toolbar {
+  display: flex;
+  gap: 8px;
+}
+
+.timeframe-btn {
+  padding: 8px 16px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.timeframe-btn:hover,
+.timeframe-btn.active {
+  background: var(--accent-blue);
+  color: white;
+  border-color: var(--accent-blue);
+}
+
+.chart-container {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  height: 500px; /* Chiều cao cố định cho Heatmap Dashboard */
+}
+
+/* ============ ANALYSIS PAGE TOOLBAR ============ */
+.trading-toolbar {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 24px;
+  align-items: center;
   flex-wrap: wrap;
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
 
-.chart-title {
+.section-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.timeframe-group,
+.indicator-group {
+  display: flex;
+  gap: 4px;
+}
+
+.tf-btn,
+.indicator-toggle {
+  padding: 6px 10px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.tf-btn:hover,
+.indicator-toggle:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
+.tf-btn.active,
+.indicator-toggle.active {
+  background: var(--accent-blue);
+  color: white;
+  border-color: var(--accent-blue);
+}
+
+/* ============ MAIN CHART SECTION (FIXED HEIGHT) ============ */
+.charts-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex: none; /* Không co giãn, giữ đúng chiều cao nội dung */
+  height: auto;
+}
+
+.main-chart-container {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 12px;
+  /* Chiều cao cố định cho Main Chart để scroll hoạt động đúng */
+  height: 550px; 
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-wrapper {
+  width: 100%;
+  height: 100%; /* Lấp đầy container cha */
+}
+
+.chart-wrapper-relative {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* ============ ANALYSIS GRID (BOTTOM CHARTS) ============ */
+.analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); /* Tăng min-width lên xíu cho đẹp */
+  gap: 24px; /* [FIX] Tăng khoảng cách giữa các chart (Margin) */
+  padding-bottom: 40px; /* Khoảng trống dưới cùng để scroll thoải mái */
+}
+
+.chart-section {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px; /* Bo góc mềm mại hơn */
+  padding: 20px; /* [FIX] Tăng padding trong khung */
+  
+  /* Chiều cao tổng của khung chart nhỏ */
+  height: 400px; 
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Thêm bóng đổ nhẹ cho nổi bật */
+}
+
+.chart-section .chart-wrapper {
+    width: 100%;
+    /* [QUAN TRỌNG] Set chiều cao cứng cho phần vẽ chart (trừ đi phần Header) */
+    /* Cha cao 400px, Header khoảng 40px + Padding -> Còn lại khoảng 320px */
+    height: 320px; 
+    flex: none; /* Bỏ flex để tránh lỗi tính toán sai height */
+}
+
+.section-header {
+  margin-bottom: 16px; /* Tăng khoảng cách giữa tiêu đề và chart */
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.section-header h3 {
   font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
-.chart-legend {
+/* ============ INTERACTIVE LEGEND (OVERLAY) ============ */
+.chart-legend-overlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+  font-family: 'Roboto Mono', monospace; 
+  font-size: 12px;
   display: flex;
-  gap: 16px;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: none; /* Chuột xuyên qua để thao tác chart */
+}
+
+.legend-row {
+  display: flex;
+  gap: 12px;
+  pointer-events: auto; /* Bật lại chuột cho các text để click */
 }
 
 .legend-item {
+  cursor: pointer;
   display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--text-secondary);
+  gap: 4px;
+  transition: opacity 0.2s;
+  background: rgba(26, 31, 46, 0.7); /* Nền mờ nhẹ để dễ đọc nếu nến đè lên */
+  padding: 2px 4px;
+  border-radius: 4px;
 }
 
-.legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
+.legend-item:hover {
+  opacity: 0.8;
+  background: rgba(26, 31, 46, 0.9);
 }
 
-.legend-item.price .legend-dot {
-  background-color: var(--neon-blue);
-}
-.legend-item.dpo .legend-dot {
-  background-color: var(--neon-green);
-}
-.legend-item.seasonal .legend-dot {
-  background-color: var(--neon-purple);
+.legend-item.hidden {
+  color: #555 !important;
+  text-decoration: line-through;
 }
 
-.chart-placeholder {
-  background-color: var(--bg-tertiary);
-  border-radius: var(--radius-md);
-  min-height: 300px;
-  width: 100%;
-}
-
-.chart-placeholder.large {
-  min-height: 360px;
-}
-
-.chart-placeholder.small {
-  min-height: 180px;
-}
-
-.chart-axis-labels {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 12px;
-  font-size: 11px;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* ========================================
-   STATS SECTION
-======================================== */
-.stats-section {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-}
-
-.stat-card {
-  background-color: var(--bg-card);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
-  padding: 16px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.stat-label {
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-muted);
-}
-
-.stat-value {
-  font-size: 20px;
+.legend-label {
   font-weight: 700;
-  color: var(--text-primary);
 }
 
-.stat-value.positive {
-  color: var(--neon-green);
-}
-.stat-value.negative {
-  color: var(--neon-red);
+.legend-value {
+  font-weight: 400;
 }
 
-/* ========================================
-   RESPONSIVE DESIGN
-======================================== */
+/* ============ PLOTLY OVERRIDES ============ */
+.plotly-graph-div {
+  background: transparent !important;
+}
+
+.js-plotly-plot .plotly .modebar {
+    left: auto !important;
+    right: 0 !important;
+}
+
+/* ============ SCROLLBAR ============ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-color);
+}
+
+/* ============ RESPONSIVE ============ */
 @media (max-width: 1400px) {
-  .signal-cards {
-    margin-left: 0;
-    margin-top: 16px;
-    width: 100%;
-  }
-
-  .price-info {
-    margin-left: 0;
-  }
-
-  .detail-header {
-    flex-direction: column;
-    align-items: flex-start;
+  .analysis-grid {
+    grid-template-columns: 1fr 1fr; /* 2 cột */
   }
 }
 
-@media (max-width: 1200px) {
-  .stats-section {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .sidebar {
-    width: 72px;
+    width: 240px;
+  }
+  .analysis-grid {
+    grid-template-columns: 1fr; /* 1 cột */
+  }
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: column;
   }
 
-  .logo-text,
-  .nav-link span,
-  .coin-info,
-  .coin-change,
-  .section-title,
-  .market-status span:not(.status-dot) {
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    flex-direction: row;
+    height: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 12px;
+  }
+
+  .sidebar-header {
+    padding: 0 16px 0 0;
+    border-bottom: none;
+    border-right: 1px solid var(--border-color);
+    margin-bottom: 0;
+    margin-right: 16px;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    padding: 0;
+    gap: 12px;
+    margin-bottom: 0;
+  }
+
+  .sidebar-divider {
     display: none;
   }
 
-  .nav-link {
-    justify-content: center;
-    padding: 12px;
+  .watchlist-section {
+    display: none;
   }
-
-  .coin-item {
-    justify-content: center;
-    padding: 12px;
-  }
-
-  .main-dashboard {
-    margin-left: 72px;
-    max-width: calc(100vw - 72px);
-    padding: 16px;
-  }
-  .stats-section {
-    grid-template-columns: repeat(2, 1fr);
+  
+  .main-chart-container {
+      height: 400px; /* Chart nhỏ hơn trên mobile */
   }
 }
 
-@media (max-width: 600px) {
-  .stats-section {
+
+/* ============ CHART BOX CONTAINERS (GREEN BOX) ============ */
+.chart-box {
+  background-color: #14F195; /* Màu xanh giống Main Chart */
+  padding: 20px;             /* Padding giống Main Chart */
+  border-radius: 6px;        /* Bo góc nhẹ */
+  margin-bottom: 24px;       /* Khoảng cách giữa các Box lớn */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Lưới chia đôi cho Scatter & Histogram */
+.chart-row-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Chia đôi 50-50 */
+  gap: 20px; /* Khoảng cách giữa 2 chart bên trong */
+}
+
+/* Đảm bảo chart-section bên trong Box xanh hiển thị đúng */
+.chart-box .chart-section {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 16px;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  /* Shadow giúp chart nổi bật trên nền xanh */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+}
+
+/* Responsive: Trên màn hình nhỏ thì xếp chồng lên nhau */
+@media (max-width: 1200px) {
+  .chart-row-split {
     grid-template-columns: 1fr;
   }
-
-  .filter-controls {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .custom-select {
-    width: 100%;
-  }
-
-  .signal-cards {
-    flex-direction: column;
-  }
-
-  .signal-card {
-    min-width: auto;
-  }
 }
-
 /* ========================================
-   PLOTLY CHART OVERRIDES
+   PLOTLY CROSSHAIR CUSTOMIZATION (CSS)
 ======================================== */
-.js-plotly-plot .plotly .modebar {
-  background-color: transparent !important;
+
+/* Can thiệp trực tiếp vào đường kẻ gióng (Spike Line) của Plotly */
+.js-plotly-plot .plotly .spikeline, 
+.js-plotly-plot .plotly .cursor-crosshair {
+    
+    /* 1. Tạo hiệu ứng chấm bi (Dot) */
+    /* Cú pháp: [độ dài nét vẽ] [khoảng cách nghỉ] */
+    /* 1px vẽ, 3px nghỉ -> Ra hình chấm bi thưa và mảnh */
+    stroke-dasharray: 1 3 !important; 
+
+    /* 2. Đảm bảo độ mỏng tuyệt đối */
+    stroke-width: 1px !important;
+
+    /* 3. Ép màu xám (Ghi đè mọi màu khác) */
+    stroke: #ffffff !important;
+
+    /* 4. Xóa các hiệu ứng mờ/bóng thừa (nếu có) */
+    stroke-opacity: 1 !important;
+    shape-rendering: crispEdges !important; /* Làm nét đường kẻ, không bị nhòe */
 }
 
-.js-plotly-plot .plotly .modebar-btn path {
-  fill: var(--text-muted) !important;
-}
-
-.js-plotly-plot .plotly .modebar-btn:hover path {
-  fill: var(--text-primary) !important;
-}
-
-/* css/styles.css */
-
-/* Container chính cho layout dọc */
-.analysis-charts-layout {
-    display: flex;
-    flex-direction: column;
-    gap: 24px; /* Khoảng cách giữa các biểu đồ */
-    margin-top: 20px;
-}
-
-/* Class ép full chiều rộng */
-.chart-card.full-width {
-    width: 100%;
-    grid-column: span 1; /* Reset grid nếu lỡ kế thừa */
-}
-
-/* Chiều cao tùy chỉnh cho từng loại chart */
-.chart-placeholder.large-height {
-    height: 500px; /* Line chart cần cao để chứa cả RSI */
-}
-
-.chart-placeholder.medium-height {
-    height: 350px; /* Các chart còn lại thấp hơn chút */
+/* Ẩn hoàn toàn viền trắng (nếu nó là một element riêng biệt bao bên ngoài) */
+.js-plotly-plot .plotly .spikeline:nth-child(even) {
+    display: none !important;
 }
