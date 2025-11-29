@@ -6,4 +6,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ["python", "clustering.py"]
+CMD ["sh", "-c", "while true; do python clustering.py; sleep 86400; done"]

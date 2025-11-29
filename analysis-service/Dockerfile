@@ -3,10 +3,10 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Cài đặt các phụ thuộc cần thiết cho psycopg2 (trên hệ thống Linux)
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc libpq-dev && \
-    rm -rf /var/lib/apt/lists/*
+# # Cài đặt các phụ thuộc cần thiết cho psycopg2 (trên hệ thống Linux)
+# RUN apt-get update && \
+#     apt-get install -y --no-install-recommends gcc libpq-dev && \
+#     rm -rf /var/lib/apt/lists/*
 
 # Copy requirements.txt và cài đặt
 COPY requirements.txt .

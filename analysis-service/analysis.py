@@ -3,38 +3,31 @@ import psycopg2
 import pandas as pd
 import os
 import logging
+import time
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 def resample_data():
-    """
-    Hàm xử lý dữ liệu tuần và ghi vào bảng price_history_weekly.
-    Dùng được trong Docker container hoặc chạy thủ công.
-    """
 
     if not DATABASE_URL:
         logging.error("DATABASE_URL environment variable not set")
         return
 
-    coin_ids = ['bitcoin', 'dogecoin', 'ethereum', 'solana', 'tether']
-    coin_list_str = ', '.join(f"'{c}'" for c in coin_ids)
-
     try:
-        # 1. Lấy dữ liệu raw
+        # ---------------------------------------------
+        # 1. Lấy dữ liệu từ price_history
+        # ---------------------------------------------
         conn = psycopg2.connect(DATABASE_URL)
-        query = f"""
+        query = """
             SELECT 
-                c.id AS coin_id,
-                ph.timestamp,
-                ph.current_price,
-                ph.market_cap,
-                ph.total_volume
-            FROM price_history ph
-            JOIN coins c ON ph.coin_id = c.id
-            WHERE c.id IN ({coin_list_str})
-            ORDER BY ph.timestamp;
+                coin_id,
+                timestamp,
+                current_price,
+                market_cap,
+                total_volume
+            FROM price_history
+            ORDER BY timestamp;
         """
-
         df = pd.read_sql_query(query, conn)
         conn.close()
 
@@ -42,81 +35,93 @@ def resample_data():
             logging.info("No data found in price_history")
             return
 
-        # 2. Chuẩn hóa timestamp
         df["timestamp"] = pd.to_datetime(df["timestamp"])
         df = df.set_index("timestamp")
 
-        # 3. Resample theo tuần
-        res_avg = df.groupby("coin_id")["current_price"].resample("W").mean().reset_index().rename(
-            columns={"current_price": "weekly_avg_price"}
-        )
-        res_max = df.groupby("coin_id")["current_price"].resample("W").max().reset_index().rename(
-            columns={"current_price": "weekly_max_price"}
-        )
-        res_min = df.groupby("coin_id")["current_price"].resample("W").min().reset_index().rename(
-            columns={"current_price": "weekly_min_price"}
-        )
-        res_mkt = df.groupby("coin_id")["market_cap"].resample("W").mean().reset_index().rename(
-            columns={"market_cap": "weekly_avg_mkt_cap"}
-        )
-        res_vol = df.groupby("coin_id")["total_volume"].resample("W").mean().reset_index().rename(
-            columns={"total_volume": "weekly_total_volume"}
-        )
+        # ---------------------------------------------
+        # 2. Tạo dữ liệu DAILY (type='day')
+        # ---------------------------------------------
+        daily = df.copy().reset_index()
+        daily["price_max"] = daily["current_price"]
+        daily["price_min"] = daily["current_price"]
+        daily["type"] = "day"
 
-        # 4. Merge
-        merged = (
-            res_avg
-            .merge(res_max, on=["coin_id", "timestamp"])
-            .merge(res_min, on=["coin_id", "timestamp"])
-            .merge(res_mkt, on=["coin_id", "timestamp"])
-            .merge(res_vol, on=["coin_id", "timestamp"])
-        )
+        # ---------------------------------------------
+        # 3. Tạo dữ liệu WEEKLY (type='week')
+        # ---------------------------------------------
+        weekly = df.groupby("coin_id").resample("W").agg({
+            "current_price": ["mean", "max", "min"],
+            "market_cap": "mean",
+            "total_volume": "mean"
+        })
+        weekly.columns = ["current_price", "price_max", "price_min", "market_cap", "total_volume"]
+        weekly = weekly.reset_index()
+        weekly["type"] = "week"
 
-        merged.rename(columns={"timestamp": "week_start_date"}, inplace=True)
-        merged["week_start_date"] = merged["week_start_date"].dt.date
+        # ---------------------------------------------
+        # 4. Tạo dữ liệu MONTHLY (type='month')
+        # ---------------------------------------------
+        monthly = df.groupby("coin_id").resample("M").agg({
+            "current_price": ["mean", "max", "min"],
+            "market_cap": "mean",
+            "total_volume": "mean"
+        })
+        monthly.columns = ["current_price", "price_max", "price_min", "market_cap", "total_volume"]
+        monthly = monthly.reset_index()
+        monthly["type"] = "month"
 
-        # 5. Upsert vào bảng weekly
+        # ---------------------------------------------
+        # 5. Gộp chung
+        # ---------------------------------------------
+        final_df = pd.concat([daily, weekly, monthly], ignore_index=True)
+
+        # ---------------------------------------------
+        # 6. Ghi vào bảng price_resampling
+        # ---------------------------------------------
         conn = psycopg2.connect(DATABASE_URL)
         cur = conn.cursor()
 
         insert_sql = """
-            INSERT INTO price_history_weekly 
-            (coin_id, week_start_date, weekly_avg_price, weekly_max_price, weekly_min_price,
-             weekly_total_volume, weekly_avg_mkt_cap)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (coin_id, week_start_date)
+            INSERT INTO price_resampling
+            (coin_id, timestamp, current_price, price_max, price_min, market_cap, total_volume, type)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (coin_id, timestamp, type)
             DO UPDATE SET
-                weekly_avg_price = EXCLUDED.weekly_avg_price,
-                weekly_max_price = EXCLUDED.weekly_max_price,
-                weekly_min_price = EXCLUDED.weekly_min_price,
-                weekly_total_volume = EXCLUDED.weekly_total_volume,
-                weekly_avg_mkt_cap = EXCLUDED.weekly_avg_mkt_cap;
+                current_price = EXCLUDED.current_price,
+                price_max = EXCLUDED.price_max,
+                price_min = EXCLUDED.price_min,
+                market_cap = EXCLUDED.market_cap,
+                total_volume = EXCLUDED.total_volume;
         """
 
-        for _, row in merged.iterrows():
+        for _, row in final_df.iterrows():
             cur.execute(insert_sql, (
                 row["coin_id"],
-                row["week_start_date"],
-                float(row["weekly_avg_price"]),
-                float(row["weekly_max_price"]),
-                float(row["weekly_min_price"]),
-                int(row["weekly_total_volume"] or 0),
-                int(row["weekly_avg_mkt_cap"] or 0)
+                row["timestamp"].to_pydatetime(),
+                row["current_price"],
+                row["price_max"],
+                row["price_min"],
+                row["market_cap"],
+                row["total_volume"],
+                row["type"]
             ))
 
         conn.commit()
         cur.close()
         conn.close()
 
-        logging.info("Weekly resample completed successfully")
+        logging.info("Daily, Weekly & Monthly resampling saved to price_resampling")
 
     except Exception as e:
-        logging.error(f"Error processing weekly data: {e}")
+        logging.error(f"Error during processing: {e}")
 
 
-# 🔥 Nếu chạy file này trực tiếp trong Docker:
+# =============================================
+# CHẠY TRONG DOCKER
+# =============================================
 if __name__ == "__main__":
+    time.sleep(5)
     logging.basicConfig(level=logging.INFO)
-    logging.info("Running weekly resample job...")
+    logging.info("Running resampling job...")
     resample_data()
     logging.info("Job finished")

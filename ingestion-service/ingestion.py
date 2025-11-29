@@ -20,6 +20,7 @@ headers = {
     "x-cg-demo-api-key": COINGECKO_API_KEY 
 }
 
+#
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -122,27 +123,29 @@ def create_tables():
         """)
 
         cur.execute("""
-            CREATE TABLE IF NOT EXISTS price_history_weekly (
+            CREATE TABLE IF NOT EXISTS price_resampling (
                 id SERIAL PRIMARY KEY,
                 coin_id TEXT REFERENCES coins(id),
-                week_start_date DATE,
-                weekly_avg_price DOUBLE PRECISION,
-                weekly_max_price DOUBLE PRECISION,
-                weekly_min_price DOUBLE PRECISION,
-                weekly_total_volume BIGINT,
-                weekly_avg_mkt_cap BIGINT
+                timestamp TIMESTAMP NULL,
+                current_price DOUBLE PRECISION NULL,
+                price_max DOUBLE PRECISION NULL,
+                price_min DOUBLE PRECISION NULL,
+                market_cap BIGINT NULL,
+                total_volume BIGINT NULL,
+                type TEXT DEFAULT 'day'
             );
         """)
 
         cur.execute("""
-            ALTER TABLE price_history_weekly
-            ADD CONSTRAINT unique_coin_week UNIQUE (coin_id, week_start_date)
+            ALTER TABLE price_resampling
+            ADD CONSTRAINT unique_coin UNIQUE (coin_id, timestamp, type);
         """)
 
         cur.execute("""
             DELETE FROM price_history
             WHERE timestamp < NOW() - INTERVAL '180 days'
         """)
+
 
         conn.commit()
         cur.close()
