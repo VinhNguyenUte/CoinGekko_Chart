@@ -1,0 +1,111 @@
+
+services:
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    networks:
+      - appnet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d mydb"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+      
+  # gateway:
+  #   build: ./api-gateway
+  #   container_name: gateway
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #     ingestion:
+  #       condition: service_started
+  #     analysis:
+  #       condition: service_started
+  #     prediction:
+  #       condition: service_started
+  #     clustering:
+  #       condition: service_started
+  #   networks:
+  #     - appnet
+
+  ingestion:
+    build: ./ingestion-service
+    container_name: ingestion
+    ports:
+      - "5001:5001"
+    environment:
+      DATABASE_URL: postgresql://admin:admin@postgres:5432/mydb
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+        
+    networks:
+      - appnet
+
+  analysis:
+    build: ./analysis-service
+    container_name: analysis
+    ports:
+      - "5002:5002"
+    environment:
+      DATABASE_URL: postgres://admin:admin@postgres:5432/mydb
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - appnet
+
+  prediction:
+    build: ./prediction-service
+    container_name: prediction
+    ports:
+      - "5003:5003"
+    environment:
+      DATABASE_URL: postgres://admin:admin@postgres:5432/mydb
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - appnet
+
+  clustering:
+    build: ./clustering-service
+    container_name: clustering
+    ports:
+      - "5004:5004"
+    environment:
+      DATABASE_URL: postgres://admin:admin@postgres:5432/mydb
+    depends_on:
+    
+      postgres:
+        condition: service_healthy
+    networks:
+      - appnet
+
+  database-api:
+    build: ./database-api
+    container_name: database-api
+    ports:
+      - "8002:8002"
+    environment:
+      DATABASE_URL: postgres://admin:admin@postgres:5432/mydb
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - appnet
+    
+
+
+networks:
+  appnet:
+    driver: bridge
