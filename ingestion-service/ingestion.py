@@ -130,6 +130,9 @@ def create_tables():
                 current_price DOUBLE PRECISION NULL,
                 price_max DOUBLE PRECISION NULL,
                 price_min DOUBLE PRECISION NULL,
+                upper_band DOUBLE PRECISION NULL,
+                lower_band DOUBLE PRECISION NULL,
+                price_rsi DOUBLE PRECISION NULL,
                 market_cap BIGINT NULL,
                 total_volume BIGINT NULL,
                 type TEXT DEFAULT 'day'

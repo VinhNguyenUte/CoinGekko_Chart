@@ -1,9 +1,11 @@
 from db import get_connection
-
+from fastapi import APIRouter, Query
 from models.PricePrediction import PricePrediction
 from models.CoinClustered import CoinClustered
 from models.PriceResampling import PriceResampling
-
+from typing import List
+import pandas as pd
+import math
 
 # -----------------------------
 # PRICE PREDICTIONS
@@ -97,3 +99,62 @@ def get_price_resampling():
         )
         for r in rows
     ]
+
+# -----------------------------
+# Detrended Price Oscillator (DPO)
+# -----------------------------
+def get_dpo(coin: str, n: int):
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT timestamp, current_price
+        FROM price_resampling
+        WHERE coin_id = %s
+        ORDER BY timestamp ASC
+    """, (coin,))
+
+    rows = cur.fetchall()
+    conn.close()
+
+    if not rows:
+        return {
+            "coin": coin,
+            "indicator_config": f"DPO_{n}",
+            "data": []
+        }
+
+
+    # Convert to DataFrame
+    df = pd.DataFrame(rows, columns=["timestamp", "price"])
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    df = df.sort_values("timestamp").reset_index(drop=True)
+
+    # -----------------------------
+    # DPO CALCULATION
+    # -----------------------------
+    shift = (n // 2) + 1
+
+    df["SMA"] = df["price"].rolling(window=n).mean()
+    df["Shifted_SMA"] = df["SMA"].shift(shift)
+
+    df["DPO"] = df["price"] - df["Shifted_SMA"]
+
+    df = df.dropna()
+
+    # -----------------------------
+    # FORMAT OUTPUT
+    # -----------------------------
+    result = {
+    "coin": coin,
+    "indicator_config": f"DPO_{n}",
+    "data": [
+        {
+            "date": str(row["timestamp"]),
+            "value": float(row["DPO"])
+        }
+        for row in df.to_dict(orient="records")
+        ]
+    }
+
+    return result
