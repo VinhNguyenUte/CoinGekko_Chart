@@ -118,8 +118,9 @@ def api_histogram_diagram(coin: str = Query("bitcoin"), type: str = Query("day")
     return build_histogram_diagram(filtered, coin_name=coin)
 
 # --------------------------------------------------------
-# API: DPO INDICATOR: http://localhost:8002/seasonal-diagram/dpo?coin=bitcoin&n=21
-# n = 24 -> 1 ngày, n = 7 -> 1 tuần, n =21 -> 1 tháng:
+# API: DPO INDICATOR: http://localhost:8002/seasonal-diagram/dpo?coin=bitcoin&interval=week&n=3
+# # n = DPO = day<=120 / week<=16 / month <=3 -> interval = day/week/month
+# -----------------------------------------
 # --------------------------------------------------------
 @app.get("/seasonal-diagram/dpo", response_model=DPOResponse)
 def api_price_resampling_dpo(coin: str, interval: str = "day", n: int = 21):
