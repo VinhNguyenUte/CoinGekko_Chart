@@ -1,158 +1,215 @@
 class App {
   constructor() {
-    this.currentPage = "dashboard"
-    this.currentCoin = "bitcoin"
-    this.data = {} // Cache dữ liệu
+    this.currentPage = "dashboard";
+    this.currentCoin = "bitcoin";
+    
+    // Cache dữ liệu để không phải gọi lại API liên tục
+    this.dataCache = {
+      dashboard: {},
+      analysis: {}
+    };
+
+    this.dashboardTimeframe = "week"; // Mặc định 1 tháng
+    this.analysisTimeframe = "1h";  // Mặc định 1 giờ cho chart chi tiết
+
     this.indicators = {
       ma: true,
       boll: true,
       rsi: true,
-      volume: false,
-    }
-    this.init()
+    };
+
+    this.init();
   }
 
   async init() {
-    this.setupEventListeners()
-    await this.loadInitialData() // Chuyển thành hàm async
-    this.renderCurrentPage()
+    this.setupEventListeners();
+    
+    // Mặc định vào Dashboard -> Load data Dashboard
+    await this.loadDashboardData();
+    this.renderCurrentPage();
   }
 
-  // Giả lập việc tải dữ liệu ban đầu từ API
-  async loadInitialData() {
-    console.log("Loading data...")
-    // Dùng Promise.all để tải song song, tiết kiệm thời gian
-    const [btc, eth, bnb, sol, corr1w, corr1m] = await Promise.all([
-      ApiService.getCoinHistory("bitcoin"),
-      ApiService.getCoinHistory("ethereum"),
-      ApiService.getCoinHistory("bnb"),
-      ApiService.getCoinHistory("solana"),
-      ApiService.getCorrelationMatrix("week"),
-      ApiService.getCorrelationMatrix("month"),
-    ])
-
-    this.data.bitcoin = btc
-    this.data.ethereum = eth
-    this.data.bnb = bnb
-    this.data.solana = sol
-    this.data.correlations_1w = corr1w
-    this.data.correlations_1m = corr1m
-    console.log("Data loaded complete.")
-  }
-
+  // --- 1. SETUP EVENT LISTENERS ---
   setupEventListeners() {
-    // Navigation
     document.querySelectorAll(".nav-item").forEach((btn) => {
       btn.addEventListener("click", () => {
-        this.switchPage(btn.dataset.page)
-      })
-    })
+        const page = btn.dataset.page;
+        this.switchPage(page);
+      });
+    });
 
-    // Dashboard filters
-    document.querySelectorAll(".timeframe-btn").forEach((btn) => {
-      btn.addEventListener("click", () => this.handleDashboardFilter(btn))
-    })
+    document.querySelectorAll("#dashboard-page .timeframe-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        // Update UI active
+        document.querySelectorAll("#dashboard-page .timeframe-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
 
-    // Indicator toggles
-    document.querySelectorAll(".indicator-toggle").forEach((btn) => {
-      btn.addEventListener("click", () => this.handleIndicatorToggle(btn))
-    })
+        // Update state & reload
+        this.dashboardTimeframe = btn.dataset.timeframe;
+        await this.loadDashboardData();
+        this.renderDashboardPage();
+      });
+    });
 
-    // Watchlist
+    // Bộ lọc Analysis (Timeframe Chart)
+    document.querySelectorAll("#analysis-page .tf-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        document.querySelectorAll("#analysis-page .tf-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        this.analysisTimeframe = btn.dataset.timeframe;
+        await this.loadAnalysisData(); // Reload data mới
+        this.renderAnalysisPage();     // Vẽ lại chart
+      });
+    });
+
+    // Chọn Coin (Watchlist) -> Tự chuyển sang trang Analysis
     document.querySelectorAll(".watchlist-item").forEach((btn) => {
-      btn.addEventListener("click", () => this.selectCoin(btn))
-    })
+      btn.addEventListener("click", async () => {
+        document.querySelectorAll(".watchlist-item").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        this.currentCoin = btn.dataset.coin; // bitcoin, ethereum...
+        
+        // Nếu đang ở Dashboard thì chuyển sang Analysis
+        if (this.currentPage !== "analysis") {
+          this.switchPage("analysis");
+        } else {
+          // Đang ở Analysis rồi thì chỉ cần reload data
+          await this.loadAnalysisData();
+          this.renderAnalysisPage();
+        }
+      });
+    });
   }
 
-  selectCoin(button) {
-    document.querySelectorAll(".watchlist-item").forEach((b) => b.classList.remove("active"))
-    button.classList.add("active")
+  // --- 2. LOAD DATA (GỌI API SERVICE) ---
 
-    this.currentCoin = button.dataset.coin
-    if (this.currentPage === "analysis") {
-      this.renderAnalysisPage()
+  async loadDashboardData() {
+    const matrix = await ApiService.getCorrelationMatrix(this.dashboardTimeframe);
+    this.currentDashboardMatrix = matrix;
+  }
+
+  async loadAnalysisData() {
+    const cacheKey = `${this.currentCoin}_${this.analysisTimeframe}`;
+    const data = await ApiService.getCoinHistory(this.currentCoin, this.analysisTimeframe);
+    
+    if (data) {
+      this.dataCache.analysis[cacheKey] = data;
     }
   }
 
-  handleIndicatorToggle(button) {
-    const indicator = button.dataset.indicator
-    this.indicators[indicator] = !this.indicators[indicator]
-    button.classList.toggle("active")
+  // --- 3. NAVIGATION & RENDER ---
 
-    if (this.currentPage === "analysis") {
-      const data = this.data[this.currentCoin]
-      // Chỉ render lại biểu đồ giá khi toggle indicator
-      TradingChart.renderPrice(data, this.indicators)
-      TradingChart.renderRSI(data, this.indicators)
-    }
-  }
+  async switchPage(page) {
+    this.currentPage = page;
 
-  handleDashboardFilter(button) {
-    document.querySelectorAll(".timeframe-btn").forEach((b) => b.classList.remove("active"))
-    button.classList.add("active")
-    this.renderDashboardPage()
-  }
+    // Ẩn hiện Page
+    document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"));
+    document.getElementById(`${page}-page`).classList.add("active");
 
-  switchPage(page) {
-    this.currentPage = page
+    // Active Menu Item
+    document.querySelectorAll(".nav-item").forEach((btn) => btn.classList.remove("active"));
+    document.querySelector(`.nav-item[data-page="${page}"]`).classList.add("active");
 
-    document.querySelectorAll(".page").forEach((p) => p.classList.remove("active"))
-    document.getElementById(`${page}-page`).classList.add("active")
-
-    document.querySelectorAll(".nav-item").forEach((btn) => btn.classList.remove("active"))
-    document.querySelector(`.nav-item[data-page="${page}"]`).classList.add("active")
-
+    // Render nội dung trang tương ứng
     if (page === "analysis") {
-      this.renderAnalysisPage()
+      // Nếu chưa có data của coin hiện tại thì load
+      await this.loadAnalysisData();
+      this.renderAnalysisPage();
       
-      // [FIX MỚI] Ép trình duyệt tính toán lại kích thước chart sau khi Tab hiện ra
+      // Resize chart để không bị méo
       setTimeout(() => {
         window.dispatchEvent(new Event('resize'));
-      }, 50); // Chỉ cần delay cực ngắn
+      }, 100);
     } else {
-      this.renderDashboardPage()
+      this.renderDashboardPage();
     }
   }
 
   renderCurrentPage() {
-    if (this.currentPage === "dashboard") {
-      this.renderDashboardPage()
-    } else {
-      this.renderAnalysisPage()
-    }
+    if (this.currentPage === "dashboard") this.renderDashboardPage();
+    else this.renderAnalysisPage();
   }
 
   renderDashboardPage() {
-    const activeFilter = document.querySelector(".timeframe-btn.active")
-    const timeframe = activeFilter ? activeFilter.dataset.timeframe : "1w"
-    const matrixKey = `correlations_${timeframe}`
+    const matrixData = this.currentDashboardMatrix;
     
-    if (!this.data[matrixKey]) return;
+    if (!matrixData) {
+        // Nếu là lần load đầu tiên bị lỗi API thì không vẽ
+        console.warn("Không có dữ liệu ma trận. Abort render.");
+        return;
+    }
 
-    DashboardChart.renderCorrelationHeatmap(this.data[matrixKey])
+    // [SỬA 3] Xóa hết logic đọc cache cũ và gọi hàm render ngay
+    DashboardChart.renderCorrelationHeatmap(matrixData);
   }
 
   renderAnalysisPage() {
-    const apiData = this.data[this.currentCoin]
+    const cacheKey = `${this.currentCoin}_${this.analysisTimeframe}`;
+    const apiData = this.dataCache.analysis[cacheKey];
+
     if (!apiData) return;
+    console.log(apiData)
 
-    const coinNames = { bitcoin: "Bitcoin", ethereum: "Ethereum", bnb: "BNB", solana: "Solana" }
-    document.getElementById("coin-name").textContent = coinNames[this.currentCoin] || "Bitcoin"
-    document.getElementById("current-price").textContent = `$${data[data.length - 1].price.toLocaleString()}`
+    let rowBasedData = [];
 
-    const latestPrice = apiData.lineData.prices[apiData.lineData.prices.length - 1];
+    if (apiData.lineData.lineData) {
+        const lineData = apiData.lineData.lineData;
+
+        const datesArray = lineData.dates || [];
+        const pricesArray = lineData.prices || [];
+        const ma50Array = lineData.ma_50 || [];
+        const bollUpArray = lineData.boll_upper || [];
+        const bollLowArray = lineData.boll_lower || [];
+        const rsiArray = lineData.rsi || [];
+        const volumeArray = lineData.volume || []; // Giả định Volume nằm trong lineData
+        rowBasedData = datesArray.map((date, i) => ({
+            // Các key này phải khớp với key mà TradingChart.js mong đợi (d.date, d.price...)
+            date: date,
+            price: pricesArray[i],
+            ma_50: ma50Array[i],
+            boll_upper: bollUpArray[i],
+            boll_lower: bollLowArray[i],
+            rsi: rsiArray[i],
+            volume: volumeArray[i], 
+            // Không cần 'change' nếu VolumePriceChart tự tính toán (và nó đang tự tính)
+        }));
+    }
+
+    if (rowBasedData.length === 0) {
+        console.warn("renderAnalysisPage: Dữ liệu đã về nhưng không đủ để render chart.");
+        // Giữ lại dòng return này để chặn lỗi crash
+        return;
+    }
+    
+    // 1. Update Header Info
+    const coinNames = { bitcoin: "Bitcoin", ethereum: "Ethereum", bnb: "BNB", solana: "Solana", tether: "Tether" };
+    const displayName = coinNames[this.currentCoin] || this.currentCoin.toUpperCase();
+    
+    document.getElementById("coin-name").textContent = displayName;
+    
+    // Lấy giá mới nhất
+    const latestPrice = rowBasedData[rowBasedData.length - 1].price;
     document.getElementById("current-price").textContent = `$${latestPrice.toLocaleString()}`;
 
-    // Render Main Chart
-    TradingChart.render(apiData.lineData, this.indicators);
     
-    // Render 3 Chart nhỏ
-    VolumePriceChart.render(data)
-    DistributionChart.render(data)
-    SeasonalChart.render(data)
+    // 2. Render Charts
+
+    // A. Trading Chart (Line + RSI)
+    TradingChart.render(rowBasedData, this.indicators, this.analysisTimeframe);
+
+    // B. Seasonal Chart (DPO) - Truyền data đã map
+    SeasonalChart.render(apiData.seasonalData); 
+
+    // C. Scatter Chart (Volume-Price Correlation) - Truyền data đã map
+    VolumePriceChart.render(rowBasedData); 
+    
+    // D. Distribution Chart (Return Distribution) - Truyền data đã map
+    DistributionChart.render(rowBasedData); 
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  new App()
-})
+  new App();
+});

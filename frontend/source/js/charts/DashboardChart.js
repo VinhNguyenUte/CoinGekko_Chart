@@ -1,6 +1,5 @@
 class DashboardChart {
-    static renderCorrelationHeatmap(matrix) {
-        // 1. Kiểm tra an toàn: Nếu API chưa trả về data hoặc lỗi, thì không vẽ để tránh crash trang
+    static renderCorrelationHeatmap(matrix) {        
         if (!matrix || !matrix.correlations || !matrix.coins) {
             console.warn("DashboardChart: No matrix data available to render.");
             return;

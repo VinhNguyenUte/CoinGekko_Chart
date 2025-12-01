@@ -290,7 +290,8 @@ ________________________________________________________________________________
 ```json
 		{
   			"coin": "bitcoin",
-  			"indicator_config": "DPO_30", 
+			"timeframe": "1h",
+  			"indicator_config": "DPO_21", 
   			"data": [
     				{ "date": "2023-11-20", "value": -1500.5 }, // Đang ở dưới mức TB $1500
     				{ "date": "2023-11-21", "value": -800.0 },  // Đang hồi phục dần

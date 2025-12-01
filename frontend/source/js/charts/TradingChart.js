@@ -1,8 +1,6 @@
 class TradingChart {
-    static render(data, indicators = {}) {
+    static render(data, indicators = {}, timeframe) {
         const dates = data.map(d => d.date);
-        const lastIdx = data.length - 1;
-
         const traces = [];
 
         // =============================================
@@ -71,10 +69,11 @@ class TradingChart {
                 hoverinfo: "y", hovertemplate: "RSI: %{y:.2f}<extra></extra>"
             });
         }
+        let hoverFormat = '%Y-%m-%d';
+        if (timeframe === '1h') {
+            hoverFormat = '%Y-%m-%d %H:%M';
+        }
 
-        // =============================================
-        // 2. CẤU HÌNH LAYOUT (SỬA ĐỔI CHÍNH Ở ĐÂY)
-        // =============================================
         const layout = {
             dragmode: 'pan',
                     
@@ -102,7 +101,7 @@ class TradingChart {
                 showline: false,            
                 showspikelabels: true,      
                 spikelabelfont: {size: 10, color: '#000'},
-                hoverformat: '%Y-%m-%d' 
+                hoverformat: hoverFormat
             },
 
             // --- TRỤC Y1 (GIÁ) - Kẻ ngang & Bám điểm ---
@@ -159,7 +158,8 @@ class TradingChart {
 
     static setupInteractiveLegends(graphDiv, data, indicators) {
         const legendContainer = document.getElementById("price-legend");
-        const lastData = data[data.length - 1];
+        // Lấy phần tử cuối cùng trong mảng data
+        const lastData = data[data.length - 1]; 
 
         const formatVal = (val) => {
             if (val === null || val === undefined) return 'N/A';
@@ -172,16 +172,17 @@ class TradingChart {
                 <span class="legend-value">${formatVal(value)}</span>
             </span>`;
 
+        // Xác định index của các trace trong mảng traces của Plotly
         let rsiIndex = -1;
         let bollStartIndex = -1;
-        let traceCount = 2; 
+        let traceCount = 2; // Price(0) + MA(1) = 2
 
         if (indicators.boll !== false) {
             bollStartIndex = 2;
-            traceCount += 2;
+            traceCount += 2; // + BollUp(2) + BollDn(3)
         }
         if (indicators.rsi !== false) {
-            rsiIndex = traceCount;
+            rsiIndex = traceCount; // RSI nằm cuối
         }
 
         const isMaVisible = graphDiv.data[1] && graphDiv.data[1].visible !== 'legendonly';
@@ -190,7 +191,7 @@ class TradingChart {
         legendContainer.innerHTML = `
             <div class="legend-row">
                 ${createItem('lg-price', 'Price', lastData.price, '#00d084', true)}
-                ${createItem('lg-ma', 'MA(50)', lastData.ma_50, '#ff9500', isMaVisible)}
+                ${createItem('lg-ma', 'MA(20)', lastData.ma_50, '#ff9500', isMaVisible)}
                 ${indicators.boll !== false ? createItem('lg-boll', 'BOLL', formatVal(lastData.boll_upper), '#a855f7', true) : ''}
             </div>
             ${indicators.rsi !== false ? `
@@ -199,18 +200,17 @@ class TradingChart {
             </div>` : ''}
         `;
 
+        // ... (Phần gán sự kiện click legend giữ nguyên) ...
         document.getElementById('lg-ma')?.addEventListener('click', function() {
             this.classList.toggle('hidden');
             Plotly.restyle(graphDiv, { visible: this.classList.contains('hidden') ? 'legendonly' : true }, [1]);
         });
-        
         if (indicators.boll !== false) {
             document.getElementById('lg-boll')?.addEventListener('click', function() {
                 this.classList.toggle('hidden');
                 Plotly.restyle(graphDiv, { visible: this.classList.contains('hidden') ? 'legendonly' : true }, [bollStartIndex, bollStartIndex + 1]);
             });
         }
-
         if (indicators.rsi !== false) {
             document.getElementById('lg-rsi')?.addEventListener('click', function() {
                 this.classList.toggle('hidden');
@@ -220,13 +220,15 @@ class TradingChart {
 
         graphDiv.on('plotly_hover', (dataEvent) => {
             const idx = dataEvent.points[0].pointIndex;
-            const d = data[idx];
+            const d = data[idx]; // Lấy object dữ liệu tại điểm hover
+            
             if (d) {
                 document.querySelector('#lg-price .legend-value').textContent = formatVal(d.price);
                 document.querySelector('#lg-ma .legend-value').textContent = formatVal(d.ma_50);
                 if (indicators.boll !== false) {
                     const up = formatVal(d.boll_upper);
                     const low = formatVal(d.boll_lower);
+                    // Hiển thị cả hai dải trên/dưới cho BOLL
                     document.querySelector('#lg-boll .legend-value').textContent = (up === 'N/A') ? 'N/A' : `${up} / ${low}`;
                 }
                 if (indicators.rsi !== false) {
@@ -235,6 +237,7 @@ class TradingChart {
             }
         });
 
+        // Unhover Event: Trả về giá trị cuối cùng
         graphDiv.on('plotly_unhover', () => {
              document.querySelector('#lg-price .legend-value').textContent = formatVal(lastData.price);
              document.querySelector('#lg-ma .legend-value').textContent = formatVal(lastData.ma_50);
