@@ -41,8 +41,8 @@ class ApiService {
         const [line, seasonal, scatter, histogram, signal] = await Promise.all([
             this.getLineChartData(symbol, timeframe),
             this.getSeasonalChartData(symbol, timeframe, indicatorConfig),
-            this.getScatterChartData(symbol, timeframe)
-            // this.getHistogramChartData(symbol, timeframe),
+            this.getScatterChartData(symbol, timeframe),
+            this.getHistogramChartData(symbol, timeframe)
             // this.getSignalData(symbol, timeframe),
         ]);
 
@@ -74,17 +74,17 @@ class ApiService {
     
     // Scatter Chart (Chỉ cần 2 params)
     static async getScatterChartData(coin, timeframe) {
-        return await this.fetchFromApi(`/charts/scatter?coin=${coin}&timeframe=${timeframe}`);
+        return await this.fetchFromApi(`/analysis/scatter?coin=${coin}&timeframe=${timeframe}`);
     }
 
     // Histogram Chart (Chỉ cần 2 params)
     static async getHistogramChartData(coin, timeframe) {
-        return await this.fetchFromApi(`/charts/histogram?coin=${coin}&timeframe=${timeframe}`);
+        return await this.fetchFromApi(`/analysis/histogram?coin=${coin}&timeframe=${timeframe}`);
     }
 
     // Signal Card (Chỉ cần 2 params)
     static async getSignalData(coin, timeframe) {
-        return await this.fetchFromApi(`/signal?coin=${coin}&timeframe=${timeframe}`);
+        return await this.fetchFromApi(`/analysis?coin=${coin}&timeframe=${timeframe}`);
     }
 
     // =======================================================

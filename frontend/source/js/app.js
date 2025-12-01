@@ -219,8 +219,6 @@ class App {
       console.warn("Không có dữ liệu ma trận. Abort render.");
       return;
     }
-
-    // [SỬA 3] Xóa hết logic đọc cache cũ và gọi hàm render ngay
     DashboardChart.renderCorrelationHeatmap(matrixData);
 
     console.log("------------------------------------------")
@@ -264,7 +262,7 @@ class App {
     VolumePriceChart.render(apiData.scatterData); 
 
     // D. Distribution Chart (Return Distribution) - Truyền data đã map
-    // DistributionChart.render(rowBasedData); 
+    DistributionChart.render(apiData.histogramData); 
 
     console.log("------------------------------------------")
   }
