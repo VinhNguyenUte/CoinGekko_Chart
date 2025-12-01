@@ -46,7 +46,6 @@ class VolumePriceChart {
         }
 
         const layout = {
-            title: { text: "Volume-Price Correlation", x: 0.02 },
             xaxis: { title: "Volume" },
             yaxis: { title: "Price Change (%)" },
             hovermode: "closest",

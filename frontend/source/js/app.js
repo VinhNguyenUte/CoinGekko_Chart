@@ -13,10 +13,12 @@ class App {
     this.analysisTimeframe = "1h";  // Mặc định 1 giờ cho chart chi tiết
 
     this.indicators = {
-      ma: true,
-      boll: true,
+      ma: false,
+      boll: false,
       rsi: true,
     };
+
+    this.seasonalConfig = 21;
 
     this.init();
   }
@@ -63,6 +65,21 @@ class App {
       });
     });
 
+    // Listener cho các nút DPO
+    document.querySelectorAll(".dpo-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        // 1. Logic UI: Tắt active cũ, bật active mới (Radio behavior)
+        document.querySelectorAll(".dpo-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        // 2. Update State
+        this.seasonalConfig = btn.dataset.config;
+
+        // 3. Gọi API và vẽ lại riêng chart này
+        await this.reloadSeasonalDataOnly();
+      });
+    });
+
     // Chọn Coin (Watchlist) -> Tự chuyển sang trang Analysis
     document.querySelectorAll(".watchlist-item").forEach((btn) => {
       btn.addEventListener("click", async () => {
@@ -92,7 +109,11 @@ class App {
 
   async loadAnalysisData() {
     const cacheKey = `${this.currentCoin}_${this.analysisTimeframe}`;
-    const data = await ApiService.getCoinHistory(this.currentCoin, this.analysisTimeframe);
+    const data = await ApiService.getCoinHistory(
+      this.currentCoin, 
+      this.analysisTimeframe,
+      this.seasonalConfig
+    );
     
     if (data) {
       this.dataCache.analysis[cacheKey] = data;
@@ -100,7 +121,6 @@ class App {
   }
 
   // --- 3. NAVIGATION & RENDER ---
-
   async switchPage(page) {
     this.currentPage = page;
 
@@ -151,37 +171,6 @@ class App {
 
     if (!apiData) return;
     console.log(apiData)
-
-    let rowBasedData = [];
-
-    if (apiData.lineData.lineData) {
-        const lineData = apiData.lineData.lineData;
-
-        const datesArray = lineData.dates || [];
-        const pricesArray = lineData.prices || [];
-        const ma50Array = lineData.ma_50 || [];
-        const bollUpArray = lineData.boll_upper || [];
-        const bollLowArray = lineData.boll_lower || [];
-        const rsiArray = lineData.rsi || [];
-        const volumeArray = lineData.volume || []; // Giả định Volume nằm trong lineData
-        rowBasedData = datesArray.map((date, i) => ({
-            // Các key này phải khớp với key mà TradingChart.js mong đợi (d.date, d.price...)
-            date: date,
-            price: pricesArray[i],
-            ma_50: ma50Array[i],
-            boll_upper: bollUpArray[i],
-            boll_lower: bollLowArray[i],
-            rsi: rsiArray[i],
-            volume: volumeArray[i], 
-            // Không cần 'change' nếu VolumePriceChart tự tính toán (và nó đang tự tính)
-        }));
-    }
-
-    if (rowBasedData.length === 0) {
-        console.warn("renderAnalysisPage: Dữ liệu đã về nhưng không đủ để render chart.");
-        // Giữ lại dòng return này để chặn lỗi crash
-        return;
-    }
     
     // 1. Update Header Info
     const coinNames = { bitcoin: "Bitcoin", ethereum: "Ethereum", bnb: "BNB", solana: "Solana", tether: "Tether" };
@@ -190,23 +179,54 @@ class App {
     document.getElementById("coin-name").textContent = displayName;
     
     // Lấy giá mới nhất
-    const latestPrice = rowBasedData[rowBasedData.length - 1].price;
-    document.getElementById("current-price").textContent = `$${latestPrice.toLocaleString()}`;
+    // const latestPrice = rowBasedData[rowBasedData.length - 1].price;
+    // document.getElementById("current-price").textContent = `$${latestPrice.toLocaleString()}`;
 
     
     // 2. Render Charts
 
     // A. Trading Chart (Line + RSI)
-    TradingChart.render(rowBasedData, this.indicators, this.analysisTimeframe);
+    const chartPayload = {
+            ...apiData.lineData.lineData, 
+                      
+            meta: {
+                timeframe: this.analysisTimeframe,
+                indicators: this.indicators
+            }
+        };
+    TradingChart.render(chartPayload);
 
     // B. Seasonal Chart (DPO) - Truyền data đã map
     SeasonalChart.render(apiData.seasonalData); 
 
     // C. Scatter Chart (Volume-Price Correlation) - Truyền data đã map
-    VolumePriceChart.render(rowBasedData); 
+    // VolumePriceChart.render(rowBasedData); 
     
     // D. Distribution Chart (Return Distribution) - Truyền data đã map
-    DistributionChart.render(rowBasedData); 
+    // DistributionChart.render(rowBasedData); 
+  }
+
+  async reloadSeasonalDataOnly() {
+    // Hiển thị loading nhẹ hoặc làm mờ chart (Optional)
+    const chartDiv = document.getElementById("seasonal-chart");
+    chartDiv.style.opacity = "0.5";
+
+    try {
+        // Gọi trực tiếp Micro-Endpoint của Seasonal
+        const dpoData = await ApiService.getSeasonalChartData(
+            this.currentCoin, 
+            this.analysisTimeframe, 
+            this.seasonalConfig
+        );
+
+        if (dpoData) {
+            SeasonalChart.render(dpoData);
+        }
+    } catch (e) {
+        console.error("Lỗi tải DPO:", e);
+    } finally {
+        chartDiv.style.opacity = "1";
+    }
   }
 }
 

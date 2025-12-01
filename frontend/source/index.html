@@ -119,6 +119,9 @@
 
                     <div class="charts-section">
                         <div class="main-chart-container">
+                            <div class="section-header">
+                                <h3>Line Chart</h3>
+                            </div>
                             <div class="chart-wrapper chart-wrapper-relative">
                                 <div id="price-legend" class="chart-legend-overlay"></div>
                                 <div id="trading-chart"></div>
@@ -147,8 +150,15 @@
 
                 <div class="chart-box">
                     <div class="chart-section" style="height: 400px;">
-                        <div class="section-header">
+                        <div class="section-header"
+                            style="display: flex; justify-content: space-between; align-items: center;">
                             <h3>Seasonal Cycle (DPO)</h3>
+
+                            <div class="seasonal-toolbar">
+                                <button class="dpo-btn" data-config="7">DPO 7</button>
+                                <button class="dpo-btn active" data-config="21">DPO 21</button> <button class="dpo-btn"
+                                    data-config="24">DPO 24</button>
+                            </div>
                         </div>
                         <div id="seasonal-chart" class="chart-wrapper"></div>
                     </div>

@@ -1,23 +1,19 @@
-// js/charts/SeasonalChart.js
-
 class SeasonalChart {
-    // [SỬA] Nhận dữ liệu dưới dạng object {dates: [], values: []} từ API
     static render(data) {
-
-        // Kiểm tra dữ liệu: Nếu là object từ API (có dates và values)
+        // Kiểm tra dữ liệu
         if (!data || !data.dates || data.dates.length === 0) {
             console.warn("SeasonalChart: Dữ liệu DPO không hợp lệ hoặc rỗng.");
-            Plotly.purge("seasonal-chart"); // Xóa chart cũ nếu không có data
+            Plotly.purge("seasonal-chart"); 
             return;
         }
 
         const dates = data.dates;
-        const dpoValues = data.values; // Dùng 'values' từ API
+        const dpoValues = data.values; 
 
         // 1. Tạo Trace
         const trace = {
             x: dates,
-            y: dpoValues, // [FIX] Dùng values
+            y: dpoValues,
             name: "DPO",
             type: "scatter",
             mode: "lines",
@@ -25,50 +21,57 @@ class SeasonalChart {
             fill: "tozeroy",
             fillcolor: "rgba(168, 85, 247, 0.1)",
             
-            // Marker để highlight điểm hover (giống TradingChart)
-            marker: { size: 5, color: '#ffffff', line: { width: 2, color: '#a855f7' } },
+            // Marker: Điểm tròn nổi bật khi hover
+            marker: { 
+                size: 6, 
+                color: '#ffffff', 
+                line: { width: 2, color: '#a855f7' } 
+            },
 
-            // Tooltip style
-            hoverinfo: "x+y", 
-            hovertemplate: "<b>Date:</b> %{x}<br><b>DPO:</b> %{y:.2f}<extra></extra>"
+            // Tooltip: Chỉ hiện giá trị Y, ngày tháng đã có ở trục X
+            hoverinfo: "y", 
+            hovertemplate: "<b>DPO:</b> %{y:.2f}<extra></extra>"
         };
 
-        // 2. Cấu hình Layout (Áp dụng style Crosshair từ TradingChart)
+        // 2. Cấu hình Layout
         const layout = {
-            title: { 
-                text: "Seasonal Cycle (DPO)", 
-                x: 0.02,
-                font: { size: 14, color: '#e3e8ef' }
-            },
-            
             dragmode: 'pan', 
-            hovermode: "closest", // Dùng closest để Crosshair hoạt động tốt hơn
+            
+            // [SỬA QUAN TRỌNG] Đổi thành 'x unified' để đồng bộ trục dọc
+            hovermode: 'x unified', 
+            
+            // Cho phép bắt điểm từ xa (Vô tận)
             hoverdistance: -1, 
             spikedistance: -1,
 
             hoverlabel: {
                 bgcolor: "rgba(37, 45, 61, 0.95)",
-                bordercolor: "transparent", 
+                bordercolor: "#2a3548", 
                 font: { color: "#e3e8ef", size: 12 },
                 namelength: 0
             },
 
-            // --- TRỤC X (Kẻ Dọc) ---
+            // --- TRỤC X (Kẻ Dọc - Đi theo chuột) ---
             xaxis: { 
                 showgrid: true, 
                 gridcolor: '#2a3548',
+                
                 showspikes: true, 
                 spikethickness: 1,       
-                spikecolor: '#999999',   // Màu xám
-                spikedash: 'dash',       
+                spikecolor: '#999999',   
+                spikedash: 'dot',       
                 spikemode: 'across',
-                spikesnap: 'cursor',     // [QUAN TRỌNG] Cho phép Crosshair chạy mượt
+                
+                // [QUAN TRỌNG] 'cursor': Đường dọc chạy mượt theo chuột
+                spikesnap: 'cursor',     
+                
+                showline: false,
                 showspikelabels: true,
                 spikelabelfont: {size: 10, color: '#000'},
-                hoverformat: '%b %d %Y' // Hiển thị ngày tháng đầy đủ
+                hoverformat: '%b %d %Y' 
             },
 
-            // --- TRỤC Y (Kẻ Ngang) ---
+            // --- TRỤC Y (Kẻ Ngang - Bám điểm) ---
             yaxis: { 
                 title: "Deviation ($)", 
                 showgrid: true, 
@@ -78,10 +81,13 @@ class SeasonalChart {
                 showspikes: true,
                 spikethickness: 1,       
                 spikecolor: '#999999',   
-                spikedash: 'dash',       
+                spikedash: 'dot',       
                 spikemode: 'across',
-                spikesnap: 'cursor',     // Cho phép Crosshair chạy mượt
                 
+                // [QUAN TRỌNG] 'data': Đường ngang dính chặt vào giá trị biểu đồ
+                spikesnap: 'data',     
+                
+                showline: false,
                 showspikelabels: true,
                 spikelabelfont: {size: 10, color: '#000'},
             },

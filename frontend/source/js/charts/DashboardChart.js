@@ -44,12 +44,6 @@ class DashboardChart {
         }
   
         const layout = {
-            title: { 
-                text: "Correlation Heatmap", 
-                x: 0.02,
-                font: { size: 18, color: "#e3e8ef" }
-            },
-            margin: { l: 60, r: 50, t: 60, b: 60 },
             paper_bgcolor: "#1a1f2e", // Màu nền card
             plot_bgcolor: "transparent",
             
