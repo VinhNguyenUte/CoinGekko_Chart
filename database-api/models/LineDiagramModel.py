@@ -6,12 +6,12 @@ class BolingerBands(BaseModel):
     upper: Optional[float] = None
     lower: Optional[float] = None
 
-class HistoryPoint(BaseModel):
-    timestamp: datetime
-    price: float
-    ma_20: Optional[float] = None
-    boll: BolingerBands = BolingerBands()
-    rsi: Optional[float] = None
+
 
 class LineDiagramModel(BaseModel):
-    history: list[HistoryPoint] = []
+    timestamp: list[datetime] = []
+    price: list[float] = []
+    ma_20: list[Optional[float]] = []
+    boll: list[BolingerBands] = []
+    rsi: list[Optional[float]] = []
+

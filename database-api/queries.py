@@ -1,15 +1,15 @@
 from db import get_connection
-
-from models.PricePrediction import PricePrediction
-from models.CoinClustered import CoinClustered
-from models.PriceResampling import PriceResampling
-
-from models.LineDiagramModel import LineDiagramModel, HistoryPoint, BolingerBands
+from collections import defaultdict
+# from models.PricePrediction import PricePrediction
+# from models.CoinClustered import CoinClustered
+from models.PriceResamplingAllField import PriceResamplingAllField
+from models.LineDiagramModel import LineDiagramModel, BolingerBands
 from models.ScatterDiagramModel import ScatterDiagramModel, ScatterPoint, TrendLine
 from models.HistogramDiagramModel import HistogramDiagramModel, HistogramStats
+from models.PriceResampling import PriceResampling
 import math
-import pandas as pd
-from typing import List
+# import pandas as pd
+# from typing import List
 
 def _sanitize_float(x):
     """Return a JSON-safe float or None for NaN/inf values."""
@@ -35,65 +35,65 @@ def _sanitize_int(x):
 # -----------------------------
 # PRICE PREDICTIONS
 # -----------------------------
-def get_price_predictions():
-    conn = get_connection()
-    cur = conn.cursor()
+# def get_price_predictions():
+#     conn = get_connection()
+#     cur = conn.cursor()
 
-    cur.execute("""
-        SELECT id, coin_id, coin_name, predicted_price, actual_price
-        FROM price_predictions
-        ORDER BY id ASC
-    """)
+#     cur.execute("""
+#         SELECT id, coin_id, coin_name, predicted_price, actual_price
+#         FROM price_predictions
+#         ORDER BY id ASC
+#     """)
     
-    rows = cur.fetchall()
-    conn.close()
+#     rows = cur.fetchall()
+#     conn.close()
 
-    return [
-        PricePrediction(
-            id=r[0],
-            coin_id=r[1],
-            coin_name=r[2],
-            predicted_price=r[3],
-            actual_price=r[4]
-        )
-        for r in rows
-    ]
+#     return [
+#         PricePrediction(
+#             id=r[0],
+#             coin_id=r[1],
+#             coin_name=r[2],
+#             predicted_price=r[3],
+#             actual_price=r[4]
+#         )
+#         for r in rows
+#     ]
 
 
 # -----------------------------
 # COIN CLUSTERED
 # -----------------------------
-def get_clustered_data():
-    conn = get_connection()
-    cur = conn.cursor()
-    print("Fetching clustered data from database...")
-    cur.execute("""
-        SELECT id, coin_id, timestamp, current_price, market_cap,
-               total_volume, percentage_change, volatility,
-               momentum, cluster_label, type
-        FROM coin_clustered
-        ORDER BY timestamp ASC
-    """)
+# def get_clustered_data():
+#     conn = get_connection()
+#     cur = conn.cursor()
+#     print("Fetching clustered data from database...")
+#     cur.execute("""
+#         SELECT id, coin_id, timestamp, current_price, market_cap,
+#                total_volume, percentage_change, volatility,
+#                momentum, cluster_label, type
+#         FROM coin_clustered
+#         ORDER BY timestamp ASC
+#     """)
     
-    rows = cur.fetchall()
-    conn.close()
+#     rows = cur.fetchall()
+#     conn.close()
 
-    return [
-        CoinClustered(
-            id=r[0],
-            coin_id=r[1],
-            timestamp=r[2],
-            current_price=r[3],
-            market_cap=r[4],
-            total_volume=r[5],
-            percentage_change=r[6],
-            volatility=r[7],
-            momentum=r[8],
-            cluster_label=r[9],
-            type=r[10]
-        )
-        for r in rows
-    ]
+#     return [
+#         CoinClustered(
+#             id=r[0],
+#             coin_id=r[1],
+#             timestamp=r[2],
+#             current_price=r[3],
+#             market_cap=r[4],
+#             total_volume=r[5],
+#             percentage_change=r[6],
+#             volatility=r[7],
+#             momentum=r[8],
+#             cluster_label=r[9],
+#             type=r[10]
+#         )
+#         for r in rows
+#     ]
 
 
 # -----------------------------
@@ -112,7 +112,7 @@ def get_price_resampling_all():
     rows = cur.fetchall()
     conn.close()
     return [
-        PriceResampling(
+        PriceResamplingAllField(
             id=r[0],
             coin_id=r[1],
             timestamp=r[2],
@@ -125,49 +125,6 @@ def get_price_resampling_all():
             market_cap=_sanitize_int(r[9]),
             total_volume=_sanitize_int(r[10]),
             type=r[11]
-        )
-        for r in rows
-    ]
-
-# -----------------------------
-# PRICE RESAMPLING BY TYPE
-# -----------------------------
-def get_price_resampling_by_type(resample_type: str):
-    conn = get_connection()
-    cur = conn.cursor()
-    print(f"Fetching resampling data of type '{resample_type}' from database...")
-    
-    # BƯỚC 1: SELECT đầy đủ 12 cột (đã bao gồm các chỉ báo đã tính toán)
-    cur.execute("""
-        SELECT id, coin_id, timestamp, current_price, price_max, price_min,
-               upper_band, lower_band, price_rsi,
-               market_cap, total_volume, type
-        FROM price_resampling
-        WHERE type = %s
-        ORDER BY timestamp ASC
-    """, (resample_type,))
-    
-    rows = cur.fetchall()
-    conn.close()
-    
-    # BƯỚC 2: Ánh xạ 12 cột vào mô hình PriceResampling
-    return [
-        PriceResampling(
-            id=r[0],
-            coin_id=r[1],
-            timestamp=r[2],
-                current_price=_sanitize_float(r[3]),
-                price_max=_sanitize_float(r[4]),
-                price_min=_sanitize_float(r[5]),
-            
-                # Lấy các giá trị đã được tính toán và lưu trong DB (sanitize)
-                upper_band=_sanitize_float(r[6]),
-                lower_band=_sanitize_float(r[7]),
-                price_rsi=_sanitize_float(r[8]),
-            
-                market_cap=_sanitize_int(r[9]),
-                total_volume=_sanitize_int(r[10]),
-                type=r[11]
         )
         for r in rows
     ]
@@ -216,11 +173,14 @@ def calculate_rsi(prices: list[float], period: int = 14) -> float | None:
     return rsi
 
 
-def build_line_diagram(rows: list[PriceResampling]) -> LineDiagramModel:
+def build_line_diagram(rows: list[PriceResamplingAllField]) -> LineDiagramModel:
     prices = [r.current_price for r in rows]
-    history_list = []
+    # history_list = []
     window_ma = 20
-
+    timestamp_list = []
+    ma_list = []
+    boll_list = []
+    rsi_list = []
     for i, row in enumerate(rows):
 
         ma_20 = calculate_ma_20(prices[i - window_ma + 1 : i + 1], window_ma)
@@ -235,16 +195,28 @@ def build_line_diagram(rows: list[PriceResampling]) -> LineDiagramModel:
 
         rsi = calculate_rsi(prices[i - window_ma + 1 : i + 1], 14) 
 
-        history_list.append(
-            HistoryPoint(
-                timestamp = row.timestamp,
-                price = row.current_price,
-                ma_20 = ma_20,
-                boll = BolingerBands(upper=upper, lower=lower),
-                rsi = rsi
+        ma_list.append(ma_20)
+        boll_list.append((upper, lower))
+        rsi_list.append(rsi)
+        timestamp_list.append(row.timestamp)
+
+        # history_list.append(
+        #     HistoryPoint(
+        #         timestamp = row.timestamp,
+        #         price = row.current_price,
+        #         ma_20 = ma_20,
+        #         boll = BolingerBands(upper=upper, lower=lower),
+        #         rsi = rsi
+        #     )
+        # )
+    
+    return LineDiagramModel(
+            timestamp = timestamp_list, 
+            price = prices, 
+            ma_20 = ma_list,
+            boll = [BolingerBands(upper=u, lower=l) for u, l in boll_list],
+            rsi = rsi_list
             )
-        )
-    return LineDiagramModel(history=history_list)
 
 # -----------------------------
 # END LINE DIAGRAM DATA
@@ -286,11 +258,12 @@ def trend_line_linearRegresstion(volumes: list[float], changes: list[float]) -> 
 
 
 
-def build_scatter_diagram(rows: list[PriceResampling]) -> ScatterDiagramModel:
+def build_scatter_diagram(rows: list[PriceResamplingAllField]) -> ScatterDiagramModel:
     
-    points = []
+    # points = []
     volumes = []
     changes = []
+    dates = []
 
     for i in range(1, len(rows)):
         today = rows[i]
@@ -300,18 +273,19 @@ def build_scatter_diagram(rows: list[PriceResampling]) -> ScatterDiagramModel:
 
         volumes.append(today.total_volume / 1_000_000) 
         changes.append(change)
-
-        points.append(
-            ScatterPoint(
-                volume =today.total_volume,
-                change = change,
-                date = today.timestamp.date().isoformat()
-            )
-        )
+        dates.append(today.timestamp.date().isoformat())
+        
 
     trend = trend_line_linearRegresstion(volumes, changes)
 
-    return ScatterDiagramModel(points=points, trendline=trend)
+    
+    
+        
+    return ScatterDiagramModel(points=ScatterPoint(
+                volume =volumes,
+                change = changes,
+                date = dates
+            ), trendline=trend)
 
 
 # -----------------------------
@@ -356,7 +330,7 @@ def calculate_max_drawdown(prices: list[float]) -> float:
             max_dd = dd
     return max_dd
 
-def build_histogram_diagram(rows: list[PriceResampling], coin_name: str) -> HistogramDiagramModel:
+def build_histogram_diagram(rows: list[PriceResamplingAllField], coin_name: str) -> HistogramDiagramModel:
     daily_returns = []
     prices = []
 
@@ -390,61 +364,176 @@ def build_histogram_diagram(rows: list[PriceResampling], coin_name: str) -> Hist
 
 
 
+
 # -----------------------------
-# Detrended Price Oscillator (DPO)
+# START RESAMPLING PRICE ALL HISTORY FOR TREND DIAGRAM
 # -----------------------------
-def get_dpo(coin: str, n: int):
+def get_price_resampling_for_trend_diagram():
+    conn = get_connection()
+    cur = conn.cursor()
+    print("Fetching resampling data from database...")
+    cur.execute("""
+        SELECT id, coin_id, timestamp, current_price, price_max, price_min,
+               upper_band, lower_band, price_rsi,market_cap, total_volume, type
+        FROM price_resampling
+        ORDER BY timestamp ASC
+    """)
+
+    rows = cur.fetchall()
+    conn.close()
+
+    return [
+        PriceResampling(
+            coin=r[1],
+            timeframe=r[11],
+            lineData={
+                "dates": [r[2]],
+                "prices": [_sanitize_float(r[3])],
+                "ma_50": [_sanitize_float(r[3])*95/100],
+                "boll_upper": [_sanitize_float(r[6])],
+                "boll_lower": [_sanitize_float(r[7])],
+                "rsi": [_sanitize_float(r[8])],
+            }
+        )
+        for r in rows
+    ]
+
+# -----------------------------
+# END RESAMPLING PRICE ALL HISTORY FOR TREND DIAGRAM
+# -----------------------------
+
+
+
+
+
+# -----------------------------
+# START RESAMPLING PRICE BY TYPE FOR TREND DIAGRAM
+# -----------------------------
+def get_price_resampling_by_type(resample_type: str):
+    conn = get_connection()
+    cur = conn.cursor()
+    print(f"Fetching resampling data of type '{resample_type}' from database...")
+    
+    # BƯỚC 1: SELECT đầy đủ 12 cột (đã bao gồm các chỉ báo đã tính toán)
+    cur.execute("""
+        SELECT id, coin_id, timestamp, current_price, price_max, price_min,
+               upper_band, lower_band, price_rsi,
+               market_cap, total_volume, type
+        FROM price_resampling
+        WHERE type = %s
+        ORDER BY timestamp ASC
+    """, (resample_type,))
+    
+    rows = cur.fetchall()
+    conn.close()
+    
+    coins = defaultdict(lambda: {
+        "dates": [],
+        "prices": [],
+        "ma_50": [],
+        "boll_upper": [],
+        "boll_lower": [],
+        "rsi": [],
+    })
+
+    for r in rows:
+        coin = r[1]
+        coins[coin]["dates"].append(r[2])
+        coins[coin]["prices"].append(_sanitize_float(r[3]))
+        coins[coin]["ma_50"].append(_sanitize_float(r[3])*95/100)
+        coins[coin]["boll_upper"].append(_sanitize_float(r[6]))
+        coins[coin]["boll_lower"].append(_sanitize_float(r[7]))
+        coins[coin]["rsi"].append(_sanitize_float(r[8]))
+
+    result = []
+
+    for coin, data in coins.items():
+        line_data = {
+            "dates": data["dates"],
+            "prices": data["prices"],
+            "ma_50": data["ma_50"],
+            "boll_upper": data["boll_upper"],
+            "boll_lower": data["boll_lower"],
+            "rsi": data["rsi"],
+        }
+        resampling_entry = PriceResampling(
+            coin=coin,
+            timeframe=resample_type,
+            lineData=line_data
+        )
+        result.append(resampling_entry)
+
+    return result
+
+
+# -----------------------------
+# START RESAMPLING PRICE BY TYPE FOR TREND DIAGRAM
+# -----------------------------
+
+
+
+# -----------------------------
+# START DPO CALCULATION FOR SEASONAL DIAGRAM
+# -----------------------------
+def get_dpo(coin: str, n: int, interval: str):
     conn = get_connection()
     cur = conn.cursor()
 
+    # map interval API → DB type
+    interval_map = {
+        "1d": "day",
+        "d": "day",
+        "day": "day",
+
+        "1w": "week",
+        "w": "week",
+        "week": "week",
+
+        "1m": "month",
+        "m": "month",
+        "month": "month"
+    }
+
+    interval_key = interval_map.get(interval.lower(), "day")  
+    print("Query interval_key =", interval_key)
     cur.execute("""
         SELECT timestamp, current_price
         FROM price_resampling
-        WHERE coin_id = %s
+        WHERE coin_id = %s AND LOWER(TRIM(type)) = LOWER(%s)
         ORDER BY timestamp ASC
-    """, (coin,))
+    """, (coin, interval_key))
 
     rows = cur.fetchall()
+    print("Rows count:", len(rows))
     conn.close()
 
     if not rows:
         return {
             "coin": coin,
-            "indicator_config": f"DPO_{n}",
+            "indicator_config": f"DPO_{n}_{interval_key.upper()}",
             "data": []
         }
 
-
-    # Convert to DataFrame
+    import pandas as pd
     df = pd.DataFrame(rows, columns=["timestamp", "price"])
     df["timestamp"] = pd.to_datetime(df["timestamp"])
     df = df.sort_values("timestamp").reset_index(drop=True)
 
-    # -----------------------------
-    # DPO CALCULATION
-    # -----------------------------
+    # DPO calculation
     shift = (n // 2) + 1
-
     df["SMA"] = df["price"].rolling(window=n).mean()
     df["Shifted_SMA"] = df["SMA"].shift(shift)
-
     df["DPO"] = df["price"] - df["Shifted_SMA"]
-
     df = df.dropna()
 
-    # -----------------------------
-    # FORMAT OUTPUT
-    # -----------------------------
-    result = {
-    "coin": coin,
-    "indicator_config": f"DPO_{n}",
-    "data": [
-        {
-            "date": str(row["timestamp"]),
-            "value": float(row["DPO"])
-        }
-        for row in df.to_dict(orient="records")
+    return {
+        "coin": coin,
+        "indicator_config": f"DPO_{n}_{interval_key.upper()}",
+        "data": [
+            {"date": row["timestamp"].isoformat(), "value": float(row["DPO"])}
+            for row in df.to_dict(orient="records")
         ]
     }
-
-    return result
+# -----------------------------
+# END DPO CALCULATION FOR SEASONAL DIAGRAM
+# -----------------------------

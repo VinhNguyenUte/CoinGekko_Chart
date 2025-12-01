@@ -1,17 +1,18 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import List, Optional
 from datetime import datetime
 
+
+class LineData(BaseModel):
+    dates: List[datetime]
+    prices: List[Optional[float]]
+    ma_50: List[Optional[float]]
+    boll_upper: List[Optional[float]]
+    boll_lower: List[Optional[float]]
+    rsi: List[Optional[float]]
+
+
 class PriceResampling(BaseModel):
-    id: int
-    coin_id: str
-    timestamp: Optional[datetime] = None
-    current_price: Optional[float] = None
-    price_max: Optional[float] = None
-    price_min: Optional[float] = None
-    upper_band: Optional[float] = None
-    lower_band: Optional[float] = None
-    price_rsi: Optional[float] = None
-    market_cap: Optional[int] = None
-    total_volume: Optional[int] = None
-    type: Optional[str] = None
+    coin: str
+    timeframe: str
+    lineData: LineData

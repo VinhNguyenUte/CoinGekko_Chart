@@ -1,15 +1,16 @@
 from pydantic import BaseModel
 from typing import Optional
+from datetime import datetime
 
 class ScatterPoint(BaseModel):
-    volume: Optional[float] = None
-    change: Optional[float] = None
-    date: Optional[str] = None
+    volume: list[float] = []
+    change: list[float] = []
+    date:   list[datetime] = []
 
 class TrendLine(BaseModel):
     slope: Optional[float] = None
     intercept: Optional[float] = None
 
 class ScatterDiagramModel(BaseModel):
-    points: list[ScatterPoint]
+    points: ScatterPoint = ScatterPoint()
     trendline: TrendLine = TrendLine()
