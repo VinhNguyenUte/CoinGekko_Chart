@@ -40,8 +40,6 @@ class TradingChart {
             visible: indicators.ma ? true : 'legendonly'
         });
 
-        // --- TRACE 2 & 3: BOLL (Index 2 & 3) ---
-        // [SỬA] Luôn tạo trace, dùng 'visible' để ẩn/hiện
         const bollVisible = indicators.boll ? true : 'legendonly';
         
         traces.push({

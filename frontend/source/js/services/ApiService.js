@@ -40,8 +40,8 @@ class ApiService {
         // Gọi song song 5 API nhỏ
         const [line, seasonal, scatter, histogram, signal] = await Promise.all([
             this.getLineChartData(symbol, timeframe),
-            this.getSeasonalChartData(symbol, timeframe, indicatorConfig) // <- TRUYỀN 3 THAM SỐ VÀO ĐÂY
-            // this.getScatterChartData(symbol, timeframe),
+            this.getSeasonalChartData(symbol, timeframe, indicatorConfig),
+            this.getScatterChartData(symbol, timeframe)
             // this.getHistogramChartData(symbol, timeframe),
             // this.getSignalData(symbol, timeframe),
         ]);

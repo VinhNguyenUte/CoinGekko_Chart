@@ -222,6 +222,8 @@ class App {
 
     // [SỬA 3] Xóa hết logic đọc cache cũ và gọi hàm render ngay
     DashboardChart.renderCorrelationHeatmap(matrixData);
+
+    console.log("------------------------------------------")
   }
 
   renderAnalysisPage() {
@@ -259,10 +261,12 @@ class App {
     SeasonalChart.render(apiData.seasonalData);
 
     // C. Scatter Chart (Volume-Price Correlation) - Truyền data đã map
-    // VolumePriceChart.render(rowBasedData); 
+    VolumePriceChart.render(apiData.scatterData); 
 
     // D. Distribution Chart (Return Distribution) - Truyền data đã map
     // DistributionChart.render(rowBasedData); 
+
+    console.log("------------------------------------------")
   }
 
   async reloadSeasonalDataOnly() {
@@ -330,7 +334,6 @@ class App {
     if (this.updateTimer) {
       clearInterval(this.updateTimer);
       this.updateTimer = null;
-      console.log("[Auto-Update] Đã dừng timer.");
     }
   }
 }
