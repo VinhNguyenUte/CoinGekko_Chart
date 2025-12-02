@@ -42,7 +42,6 @@
                             <div class="coin-name">Bitcoin</div>
                             <div class="coin-symbol">BTC</div>
                         </div>
-                        <div class="coin-change positive">+2.4%</div>
                     </button>
                     <button class="watchlist-item" data-coin="ethereum">
                         <div class="coin-icon" style="background: linear-gradient(135deg, #627EEA, #64B5F6);">E</div>
@@ -50,15 +49,20 @@
                             <div class="coin-name">Ethereum</div>
                             <div class="coin-symbol">ETH</div>
                         </div>
-                        <div class="coin-change positive">+1.8%</div>
                     </button>
-                    <button class="watchlist-item" data-coin="bnb">
-                        <div class="coin-icon" style="background: linear-gradient(135deg, #FFB81C, #FFA500);">N</div>
+                    <button class="watchlist-item" data-coin="dogecoin">
+                        <div class="coin-icon" style="background: linear-gradient(135deg, #00ff66, #FFA500);">D</div>
                         <div class="coin-info">
-                            <div class="coin-name">BNB</div>
-                            <div class="coin-symbol">BNB</div>
+                            <div class="coin-name">Dogecoin</div>
+                            <div class="coin-symbol">DOGE</div>
                         </div>
-                        <div class="coin-change negative">-0.5%</div>
+                    </button>
+                    <button class="watchlist-item" data-coin="tether">
+                        <div class="coin-icon" style="background: linear-gradient(135deg, #98d400, #8f0303);">T</div>
+                        <div class="coin-info">
+                            <div class="coin-name">Tether</div>
+                            <div class="coin-symbol">USDT</div>
+                        </div>
                     </button>
                     <button class="watchlist-item" data-coin="solana">
                         <div class="coin-icon" style="background: linear-gradient(135deg, #00D4AA, #14F195);">S</div>
@@ -66,7 +70,6 @@
                             <div class="coin-name">Solana</div>
                             <div class="coin-symbol">SOL</div>
                         </div>
-                        <div class="coin-change positive">+5.2%</div>
                     </button>
                 </div>
             </div>
@@ -99,14 +102,12 @@
                 </div>
             </div>
 
-            <!-- Analysis Page -->
             <div id="analysis-page" class="page">
                 <div class="chart-header">
                     <div class="header-title">
                         <h1 id="coin-name">Bitcoin</h1>
                         <div class="coin-price">
-                            <span id="current-price">$95,000.00</span>
-                            <span id="price-change" class="change positive">+2.4%</span>
+                            <span id="current-price">Thay giá tại đây</span>
                         </div>
                     </div>
                 </div>
@@ -116,8 +117,7 @@
                         <div class="toolbar-section">
                             <span class="section-label">Timeframes</span>
                             <div class="timeframe-group">
-                                <button class="tf-btn active" data-timeframe="1h">1h</button>
-                                <button class="tf-btn" data-timeframe="day">1d</button>
+                                <button class="tf-btn active" data-timeframe="day">1d</button>
                                 <button class="tf-btn" data-timeframe="week">1w</button>
                                 <button class="tf-btn" data-timeframe="month">1m</button>
                             </div>
@@ -160,26 +160,24 @@
                 </div>
 
                 <div class="chart-box">
-                    <div class="chart-section" style="height: 400px;">
+                    <div class="chart-section">
                         <div class="section-header"
                             style="display: flex; justify-content: space-between; align-items: center;">
                             <h3>Seasonal Cycle (DPO)</h3>
 
                             <div class="seasonal-toolbar">
+                                <button class="dpo-btn" data-config="3">DPO 3</button>
                                 <button class="dpo-btn" data-config="7">DPO 7</button>
-                                <button class="dpo-btn active" data-config="21">DPO 21</button> <button class="dpo-btn"
-                                    data-config="24">DPO 24</button>
+                                <button class="dpo-btn active" data-config="21">DPO 21</button>
                             </div>
                         </div>
                         <div id="seasonal-chart" class="chart-wrapper"></div>
                     </div>
                 </div>
             </div>
-    </div>
-    </main>
+        </main>
     </div>
 
-    <script src="js/utils/DataGenerator.js"></script>
     <script src="js/services/ApiService.js"></script>
 
     <script src="js/charts/DashboardChart.js"></script>

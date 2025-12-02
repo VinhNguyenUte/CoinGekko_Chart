@@ -103,14 +103,67 @@ def resample_data():
         )
 
         # --------------------------------------------------
-        # 3. WEEKLY
+        # 3. MONTHLY
         # --------------------------------------------------
-        weekly = df.groupby("coin_id").resample("W").agg({
+
+        monthly_temp = df.reset_index()
+
+        monthly = monthly_temp.groupby("coin_id").resample("M", on="timestamp").agg({
             "current_price": ["mean", "max", "min"],
             "market_cap": "mean",
-            "total_volume": "mean"
+            "total_volume": "mean",
+            "timestamp": "last" 
         })
-        weekly.columns = ["current_price", "price_max", "price_min", "market_cap", "total_volume"]
+
+        # Đổi tên cột như trước
+        monthly.columns = ["current_price", "price_max", "price_min", "market_cap", "total_volume", "resample_timestamp"]
+
+        # Đặt cột resample_timestamp thành index mới (timestamp mong muốn)
+        monthly = monthly.reset_index(level="coin_id").set_index("resample_timestamp")
+        # Đổi tên index mới thành 'timestamp'
+        monthly.index.name = "timestamp"
+
+        monthly = monthly.reset_index()
+        monthly["type"] = "month"
+
+        monthly = monthly.groupby("coin_id", group_keys=False).apply(
+            lambda x: apply_indicators(x, bb_window=5, rsi_window=3)
+        )
+        # weekly = df.groupby("coin_id").resample("W").agg({
+        #     "current_price": ["mean", "max", "min"],
+        #     "market_cap": "mean",
+        #     "total_volume": "mean"
+        # })
+        # weekly.columns = ["current_price", "price_max", "price_min", "market_cap", "total_volume"]
+        # weekly = weekly.reset_index()
+        # weekly["type"] = "week"
+
+        # weekly = weekly.groupby("coin_id", group_keys=False).apply(
+        #     lambda x: apply_indicators(x, bb_window=10, rsi_window=7)
+        # )
+
+       
+        # --------------------------------------------------
+        # 4. WEEKLY
+        # --------------------------------------------------
+        # Reset index tạm thời để có thể truy cập cột timestamp
+        weekly_temp = df.reset_index()
+
+        weekly = weekly_temp.groupby("coin_id").resample("W", on="timestamp").agg({
+            "current_price": ["mean", "max", "min"],
+            "market_cap": "mean",
+            "total_volume": "mean",
+            "timestamp": "last" 
+        })
+
+        # Đổi tên cột như trước
+        weekly.columns = ["current_price", "price_max", "price_min", "market_cap", "total_volume", "resample_timestamp"]
+
+        # Đặt cột resample_timestamp thành index mới (timestamp mong muốn)
+        weekly = weekly.reset_index(level="coin_id").set_index("resample_timestamp")
+        # Đổi tên index mới thành 'timestamp'
+        weekly.index.name = "timestamp"
+
         weekly = weekly.reset_index()
         weekly["type"] = "week"
 
@@ -118,22 +171,7 @@ def resample_data():
             lambda x: apply_indicators(x, bb_window=10, rsi_window=7)
         )
 
-        # --------------------------------------------------
-        # 4. MONTHLY
-        # --------------------------------------------------
-        monthly = df.groupby("coin_id").resample("M").agg({
-            "current_price": ["mean", "max", "min"],
-            "market_cap": "mean",
-            "total_volume": "mean"
-        })
-        monthly.columns = ["current_price", "price_max", "price_min", "market_cap", "total_volume"]
-        monthly = monthly.reset_index()
-        monthly["type"] = "month"
-
-        monthly = monthly.groupby("coin_id", group_keys=False).apply(
-            lambda x: apply_indicators(x, bb_window=5, rsi_window=3)
-        )
-
+       
         # --------------------------------------------------
         # 5. Gộp chung
         # --------------------------------------------------
