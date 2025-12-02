@@ -1,19 +1,15 @@
 class SeasonalChart {
     static render(data) {
         const chartId = "seasonal-chart";
-
-        console.log(data)
-
-        // 2. Validate dữ liệu đầu vào
-        if (!data || !data.dates || !data.values) {
+        
+        if (!data || !data.date || !data.value) {
             this.showErrorState(chartId, "Không có dữ liệu DPO để hiển thị.");
             return;
         }
 
-        const dates = data.dates;
-        const dpoValues = data.values;
+        const dates = data.date;
+        const dpoValues = data.value;
 
-        // Kiểm tra độ dài mảng
         if (dates.length !== dpoValues.length) {
             this.showErrorState(chartId, `Lỗi dữ liệu: Thời gian (${dates.length}) và Giá trị (${dpoValues.length}) không khớp.`);
             return;
@@ -24,10 +20,8 @@ class SeasonalChart {
             return;
         }
 
-        // 3. Xóa lỗi cũ trước khi vẽ (Logic mới cập nhật)
         this.clearErrorState(chartId);
 
-        // 1. Tạo Trace
         const trace = {
             x: dates,
             y: dpoValues,
@@ -37,85 +31,60 @@ class SeasonalChart {
             line: { color: "#a855f7", width: 2 },
             fill: "tozeroy",
             fillcolor: "rgba(168, 85, 247, 0.1)",
-            
-            // Marker: Điểm tròn nổi bật khi hover
             marker: { 
                 size: 6, 
                 color: '#ffffff', 
                 line: { width: 2, color: '#a855f7' } 
             },
-
-            // Tooltip: Chỉ hiện giá trị Y, ngày tháng đã có ở trục X
             hoverinfo: "y", 
             hovertemplate: "<b>DPO:</b> %{y:.2f}<extra></extra>"
         };
 
-        // 2. Cấu hình Layout
         const layout = {
             dragmode: 'pan', 
-            
-            // [SỬA QUAN TRỌNG] Đổi thành 'x unified' để đồng bộ trục dọc
             hovermode: 'x unified', 
-            
-            // Cho phép bắt điểm từ xa (Vô tận)
             hoverdistance: -1, 
             spikedistance: -1,
-
             hoverlabel: {
                 bgcolor: "rgba(37, 45, 61, 0.95)",
                 bordercolor: "#2a3548", 
                 font: { color: "#e3e8ef", size: 12 },
                 namelength: 0
             },
-
-            // --- TRỤC X (Kẻ Dọc - Đi theo chuột) ---
             xaxis: { 
                 showgrid: true, 
                 gridcolor: '#2a3548',
-                
                 showspikes: true, 
                 spikethickness: 1,       
                 spikecolor: '#999999',   
                 spikedash: 'dot',       
                 spikemode: 'across',
-                
-                // [QUAN TRỌNG] 'cursor': Đường dọc chạy mượt theo chuột
                 spikesnap: 'cursor',     
-                
                 showline: false,
                 showspikelabels: true,
                 spikelabelfont: {size: 10, color: '#000'},
                 hoverformat: '%b %d %Y' 
             },
-
-            // --- TRỤC Y (Kẻ Ngang - Bám điểm) ---
             yaxis: { 
                 title: "Deviation ($)", 
                 showgrid: true, 
                 gridcolor: '#2a3548',
                 zeroline: false,
-                
                 showspikes: true,
                 spikethickness: 1,       
                 spikecolor: '#999999',   
                 spikedash: 'dot',       
                 spikemode: 'across',
-                
-                // [QUAN TRỌNG] 'data': Đường ngang dính chặt vào giá trị biểu đồ
                 spikesnap: 'data',     
-                
                 showline: false,
                 showspikelabels: true,
                 spikelabelfont: {size: 10, color: '#000'},
             },
-
             margin: { l: 50, r: 20, t: 40, b: 40 },
             paper_bgcolor: "transparent",
             plot_bgcolor: "transparent",
             font: { color: "#e3e8ef" },
             showlegend: false,
-
-            // Đường Zero Line cố định
             shapes: [
                 {
                     type: "line",
@@ -140,17 +109,17 @@ class SeasonalChart {
         const container = document.getElementById(containerId);
         if (container) {
             container.removeAttribute("style");
-            container.innerHTML = ""; // Xóa sạch nội dung cũ
+            container.innerHTML = ""; 
         }
     }
 
     static showErrorState(containerId, message) {
         const container = document.getElementById(containerId);
+
         if (!container) return;
 
-        // Xóa biểu đồ Plotly cũ
         try { Plotly.purge(containerId); } catch (e) {}
-
+        
         container.innerHTML = `
             <div style="
                 display: flex; 

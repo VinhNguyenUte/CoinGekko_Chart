@@ -1,29 +1,22 @@
 class TradingChart {
-    static render(payload) {
-        console.log(payload)
+    static render(data) {
         const chartId = "trading-chart";
 
-        // 1. KIỂM TRA DỮ LIỆU CỐT LÕI (Bắt buộc phải có)
-        if (!payload || !payload.dates || !payload.prices) {
+        if (!data || !data.dates || !data.prices) {
             this.showErrorState(chartId, "Không có dữ liệu giá để hiển thị.");
             return;
         }
 
-        const dates = payload.dates;
-        const prices = payload.prices;
-
-        // Các chỉ báo (Có thể null hoặc rỗng)
-        // Lưu ý: API nên trả về mảng có độ dài bằng dates, chứa null ở đầu
-        const ma50 = payload.ma_50 || [];
-        const bollUp = payload.boll_upper || [];
-        const bollLow = payload.boll_lower || [];
-        const rsi = payload.rsi || [];
-
-        const meta = payload.meta || {};
+        const dates = data.timestamp;
+        const prices = data.price;
+        const ma50 = data.ma_20 || [];
+        const bollUp = data.boll_upper || [];
+        const bollLow = data.boll_lower || [];
+        const rsi = data.rsi || [];
+        const meta = data.meta || {};
         const indicators = meta.indicators || { ma: false, boll: false, rsi: true };
-        const timeframe = meta.timeframe || '1d';
+        const timeframe = meta.type || 'day';
 
-        // 2. VALIDATION CHẶT CHẼ CHO GIÁ & NGÀY
         if (dates.length !== prices.length) {
             this.showErrorState(chartId, "Lỗi dữ liệu: Số lượng Ngày và Giá không khớp.");
             return;
@@ -36,9 +29,6 @@ class TradingChart {
 
         this.clearErrorState(chartId);
 
-        // 3. XỬ LÝ AN TOÀN CHO INDICATORS
-        // Hàm helper để kiểm tra xem mảng indicator có hợp lệ để vẽ không
-        // Hợp lệ = Có dữ liệu VÀ độ dài khớp với trục thời gian
         const isValidIndicator = (arr) => {
             if (!arr || arr.length === 0) return false;
             if (arr.length !== dates.length) {
@@ -50,7 +40,6 @@ class TradingChart {
 
         const traces = [];
 
-        // --- TRACE 0: PRICE (Index 0) ---
         traces.push({
             x: dates, y: prices,
             name: "Price", type: "scatter", mode: "lines",
@@ -60,8 +49,6 @@ class TradingChart {
             hovertemplate: "Price: %{y:,.2f}<extra></extra>"
         });
 
-        // --- TRACE 1: MA(50) (Index 1) ---
-        // [SỬA] Luôn tạo trace, dùng 'visible' để ẩn/hiện
         traces.push({
             x: dates, y: ma50,
             name: "MA(50)", type: "scatter", mode: "lines",
@@ -69,8 +56,6 @@ class TradingChart {
             marker: { size: 5, color: '#ffffff', line: { width: 2, color: '#ff9500' } },
             hoverinfo: "y",
             hovertemplate: "MA(50): %{y:,.2f}<extra></extra>",
-
-            // [QUAN TRỌNG] Nếu false thì là 'legendonly' (ẩn), ngược lại là true (hiện)
             visible: indicators.ma ? true : 'legendonly'
         });
 
@@ -97,8 +82,6 @@ class TradingChart {
             visible: bollVisible
         });
 
-        // --- TRACE 4: RSI (Index 4) ---
-        // RSI vẫn nên giữ điều kiện IF để tránh vẽ trục phụ yaxis2 nếu không cần thiết
         if (indicators.rsi !== false) {
             traces.push({
                 x: dates, y: rsi,
@@ -145,7 +128,7 @@ class TradingChart {
                 boll_lower: bollLow[lastIdx],
                 rsi: rsi[lastIdx]
             };
-            this.setupInteractiveLegends(gd, payload, indicators, lastDataObj);
+            this.setupInteractiveLegends(gd, data, indicators, lastDataObj);
         });
     }
 
@@ -157,7 +140,6 @@ class TradingChart {
             return typeof val === 'number' ? val.toFixed(2) : val;
         };
 
-        // Helper tạo item, thêm tham số isVisible để set class hidden
         const createItem = (id, label, value, color, isVisible) => `
             <span class="legend-item ${isVisible ? '' : 'hidden'}" id="${id}" style="color: ${color}">
                 <span class="legend-label">${label}</span>
@@ -165,17 +147,12 @@ class TradingChart {
             </span>`;
 
         const findTraceIndex = (name) => graphDiv.data.findIndex(t => t.name === name);
-
         const maIndex = findTraceIndex("MA(50)");
         const bollStartIndex = findTraceIndex("BOLL_UP");
         const rsiIndex = findTraceIndex("RSI(14)");
-
-        // Check visible
         const isMaVisible = maIndex !== -1 && graphDiv.data[maIndex].visible === true;
         const isBollVisible = bollStartIndex !== -1 && graphDiv.data[bollStartIndex].visible === true;
-        const isRsiVisible = rsiIndex !== -1 && graphDiv.data[rsiIndex].visible !== 'legendonly'; // RSI mặc định hiện
 
-        // Render HTML: Luôn render thẻ span của MA và BOLL
         legendContainer.innerHTML = `
             <div class="legend-row">
                 ${createItem('lg-price', 'Price', lastData.price, '#00d084', true)}
@@ -188,11 +165,9 @@ class TradingChart {
             </div>` : ''}
         `;
 
-        // Gán sự kiện click: Luôn gán vì element luôn tồn tại
         document.getElementById('lg-ma').addEventListener('click', function () {
             const isHidden = this.classList.contains('hidden');
             this.classList.toggle('hidden');
-            // Toggle giữa true (hiện) và 'legendonly' (ẩn nhưng giữ data)
             Plotly.restyle(graphDiv, { visible: isHidden ? true : 'legendonly' }, [maIndex]);
         });
 
@@ -206,16 +181,12 @@ class TradingChart {
             document.getElementById('lg-rsi')?.addEventListener('click', function () {
                 const isHidden = this.classList.contains('hidden');
                 this.classList.toggle('hidden');
-                // RSI nằm ở trục riêng, có thể dùng 'legendonly' hoặc false
                 Plotly.restyle(graphDiv, { visible: isHidden ? true : 'legendonly' }, [rsiIndex]);
             });
         }
 
-        // Hover Event
         graphDiv.on('plotly_hover', (dataEvent) => {
             const idx = dataEvent.points[0].pointIndex;
-
-            // Lấy data an toàn
             const d = {
                 price: rawData.prices ? rawData.prices[idx] : null,
                 ma_50: rawData.ma_50 ? rawData.ma_50[idx] : null,
@@ -223,23 +194,18 @@ class TradingChart {
                 boll_lower: rawData.boll_lower ? rawData.boll_lower[idx] : null,
                 rsi: rawData.rsi ? rawData.rsi[idx] : null
             };
-
             if (d) {
                 document.querySelector('#lg-price .legend-value').textContent = formatVal(d.price);
-                // Luôn cập nhật giá trị text kể cả khi ẩn (để khi bật lên là có số ngay)
                 document.querySelector('#lg-ma .legend-value').textContent = formatVal(d.ma_50);
-
                 const up = formatVal(d.boll_upper);
                 const low = formatVal(d.boll_lower);
                 document.querySelector('#lg-boll .legend-value').textContent = (up === 'N/A') ? 'N/A' : `${up} / ${low}`;
-
                 if (indicators.rsi !== false) {
                     document.querySelector('#lg-rsi .legend-value').textContent = formatVal(d.rsi);
                 }
             }
         });
 
-        // Unhover Event
         graphDiv.on('plotly_unhover', () => {
             document.querySelector('#lg-price .legend-value').textContent = formatVal(lastData.price);
             document.querySelector('#lg-ma .legend-value').textContent = formatVal(lastData.ma_50);
@@ -254,22 +220,16 @@ class TradingChart {
         const container = document.getElementById(containerId);
         if (container) {
             container.removeAttribute("style");
-
-            // 2. [SỬA LẠI] Luôn xóa sạch nội dung cũ (thông báo lỗi rác)
-            // Không cần kiểm tra class 'js-plotly-plot' nữa để đảm bảo container sạch sẽ
             container.innerHTML = "";
         }
     }
-
+    
     static showErrorState(containerId, message) {
         const container = document.getElementById(containerId);
         if (!container) return;
-
-        Plotly.purge(containerId); // Xóa biểu đồ Plotly
+        Plotly.purge(containerId);
         const legendContainer = document.getElementById("price-legend");
         if (legendContainer) legendContainer.innerHTML = "";
-
-        // Thêm style trực tiếp vào container để căn giữa thông báo lỗi
         container.innerHTML = `
             <div style="
                 display: flex; 

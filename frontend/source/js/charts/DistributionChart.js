@@ -1,15 +1,11 @@
 class DistributionChart {
     static render(data) {
-        // [FIX] Kiểm tra đúng key 'daily_returns' như trong hình log
         if (!data || !data.daily_returns || data.daily_returns.length === 0) {
             console.warn("DistributionChart: Không có dữ liệu 'daily_returns'.");
             return;
         }
-
-        // 1. TRUY CẬP DỮ LIỆU
-        const returns = data.daily_returns; // Lấy trực tiếp mảng
+        const returns = data.daily_returns; 
         
-        // Lấy stats an toàn
         const stats = data.stats || { mean: 0, std_dev: 1 };
         const mean = stats.mean;
         const std = stats.std_dev;
@@ -19,7 +15,6 @@ class DistributionChart {
             return;
         }
 
-        // 2. TẠO TRACE HISTOGRAM (Cột)
         const trace1 = {
             x: returns,
             type: "histogram",
@@ -33,22 +28,19 @@ class DistributionChart {
             hovertemplate: "<b>Range:</b> %{x}%<br><b>Count:</b> %{y}<extra></extra>",
         };
 
-        // 3. TÍNH TOÁN ĐƯỜNG CONG CHUẨN (BELL CURVE)
+        // Tính toán đường cong chuẩn (BELL CURVE)
         const xValues = [];
         const yValues = [];
         
-        // Tạo khoảng X rộng hơn min/max thực tế để đường cong đẹp hơn
         const minX = Math.min(...returns);
         const maxX = Math.max(...returns);
-        // Mở rộng phạm vi vẽ ra 3 độ lệch chuẩn hoặc 20% biên độ
         const rangePadding = (maxX - minX) * 0.2; 
         const start = minX - rangePadding;
         const end = maxX + rangePadding;
-        const step = (end - start) / 100; // 100 điểm vẽ
+        const step = (end - start) / 100; 
 
         for (let x = start; x <= end; x += step) {
-            xValues.push(x);
-            // Công thức Gaussian PDF
+            xValues.push(x); 
             if (std !== 0) {
                 const exponent = -0.5 * Math.pow((x - mean) / std, 2);
                 const probability = (1 / (std * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
@@ -57,8 +49,7 @@ class DistributionChart {
                 yValues.push(0);
             }
         }
-
-        // 4. TẠO TRACE BELL CURVE (Đường)
+ 
         const trace2 = {
             x: xValues,
             y: yValues,
@@ -66,11 +57,10 @@ class DistributionChart {
             type: "scatter",
             mode: "lines",
             line: { color: "#ff9500", width: 2 },
-            yaxis: "y2", // Gắn vào trục Y ảo bên phải
+            yaxis: "y2", 
             hoverinfo: "skip"
         };
 
-        // 5. LAYOUT
         const layout = {
             title: { 
                 text: `Return Distribution (Mean: ${mean.toFixed(2)}%, Std: ${std.toFixed(2)}%)`, 
@@ -88,21 +78,18 @@ class DistributionChart {
                 namelength: 0 
             },
             
-            // Trục X
             xaxis: { 
                 title: "Daily Return (%)", 
                 gridcolor: '#2a3548',
                 zeroline: true, zerolinecolor: '#8892a0' 
             },
             
-            // Trục Y1 (Histogram - Tần suất)
             yaxis: { 
                 title: "Frequency", 
                 gridcolor: '#2a3548',
-                fixedrange: true // Khóa kéo lên xuống
+                fixedrange: true 
             },
 
-            // Trục Y2 (Bell Curve - Xác suất) - Ẩn đi
             yaxis2: {
                 overlaying: "y", 
                 side: "right",   
@@ -111,7 +98,6 @@ class DistributionChart {
                 fixedrange: true
             },
 
-            // Vẽ đường kẻ dọc Mean Line
             shapes: [{
                 type: 'line',
                 x0: mean, y0: 0, x1: mean, y1: 1, yref: 'paper',

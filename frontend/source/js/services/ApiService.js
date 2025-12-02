@@ -1,17 +1,14 @@
 class ApiService {
-    static BASE_URL = "https://984ebc23-11b4-4ab3-ba98-cc024f482a03.mock.pstmn.io";
+    static BASE_URL = "http://localhost:8002";
 
-    // Hàm gọi API chung (Helper)
     static async fetchFromApi(endpoint) {
         try {
             console.log(`[API CALL] ${this.BASE_URL}${endpoint}`);
             const response = await fetch(`${this.BASE_URL}${endpoint}`);
-
             if (!response.ok) {
                 console.warn(`[API ERROR] ${response.status} - ${endpoint}`);
                 return null;
             }
-            
             return response.json();
         } catch (error) {
             console.error("Lỗi kết nối API:", error);
@@ -19,35 +16,33 @@ class ApiService {
         }
     }
 
-    // =======================================================
-    // 1. DASHBOARD API
-    // =======================================================
     static async getCorrelationMatrix(timeframe) {
         const data = await this.fetchFromApi(`/dashboard?type=${timeframe}`);
+        
         if (data) {
             return { coins: data.labels, correlations: data.z_values };
         }
+
         return null;
     }
 
-    // =======================================================
-    // 2. ANALYSIS API (Hàm bạn đang bị thiếu)
-    // =======================================================
-
-    static async getCoinHistory(coinId, timeframe = '1M', indicatorConfig = 21) { 
-        const symbol = this.mapCoinToSymbol(coinId);
-
-        // Gọi song song 5 API nhỏ
+    static async getCoinHistory(coinId, timeframe = 'day', indicatorConfig = 21) { 
+        if (timeframe=="day")
+            indicatorConfig = 21;
+        else if (timeframe=="week")
+            indicatorConfig = 9;
+        else if (timeframe=="month")
+            indicatorConfig = 3;
+        
         const [line, seasonal, scatter, histogram, signal] = await Promise.all([
-            this.getLineChartData(symbol, timeframe),
-            this.getSeasonalChartData(symbol, timeframe, indicatorConfig),
-            this.getScatterChartData(symbol, timeframe),
-            this.getHistogramChartData(symbol, timeframe)
-            // this.getSignalData(symbol, timeframe),
+            this.getLineChartData(coinId, timeframe),
+            this.getSeasonalChartData(coinId, timeframe, indicatorConfig),
+            this.getScatterChartData(coinId, timeframe),
+            this.getHistogramChartData(coinId, timeframe)
         ]);
 
         return {
-            coin: symbol,
+            coin: coinId,
             lineData: line,
             seasonalData: seasonal,
             scatterData: scatter,
@@ -56,49 +51,24 @@ class ApiService {
         };
     }
 
-    // =======================================================
-    // 2. MICRO-ENDPOINT FUNCTIONS (Sử dụng 3 tham số)
-    // =======================================================
-
-    // Line Chart (Chỉ cần 2 params)
     static async getLineChartData(coin, timeframe) {
         return await this.fetchFromApi(`/analysis/line?coin=${coin}&timeframe=${timeframe}`);
     }
 
-    // Seasonal Chart (Cần đủ 3 params để khớp với URL trong hình)
     static async getSeasonalChartData(coin, timeframe, indicatorConfig = 21) {
-        // [FIX] Cấu hình URL để có đủ 3 params
         const endpoint = `/analysis/seasonal?coin=${coin}&timeframe=${timeframe}&indicator_config=${indicatorConfig}`;
         return await this.fetchFromApi(endpoint);
     }
-    
-    // Scatter Chart (Chỉ cần 2 params)
+
     static async getScatterChartData(coin, timeframe) {
         return await this.fetchFromApi(`/analysis/scatter?coin=${coin}&timeframe=${timeframe}`);
     }
 
-    // Histogram Chart (Chỉ cần 2 params)
     static async getHistogramChartData(coin, timeframe) {
         return await this.fetchFromApi(`/analysis/histogram?coin=${coin}&timeframe=${timeframe}`);
     }
-
-    // Signal Card (Chỉ cần 2 params)
+    
     static async getSignalData(coin, timeframe) {
         return await this.fetchFromApi(`/analysis?coin=${coin}&timeframe=${timeframe}`);
-    }
-
-    // =======================================================
-    // 3. UTILS
-    // =======================================================
-    static mapCoinToSymbol(coinId) {
-        if (!coinId) return 'BTC';
-        const map = {
-            'bitcoin': 'BTC',
-            'ethereum': 'ETH',
-            'bnb': 'BNB',
-            'solana': 'SOL',
-            'tether': 'USDT'
-        };
-        return map[coinId.toLowerCase()] || coinId.toUpperCase();
     }
 }
