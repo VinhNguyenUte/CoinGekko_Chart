@@ -99,10 +99,14 @@ def create_tables():
         cur.execute("""
             CREATE TABLE IF NOT EXISTS price_predictions (
                 id SERIAL PRIMARY KEY,
-                coin_id TEXT REFERENCES coins(id),
-                coin_name TEXT NULL,
-                predicted_price DOUBLE PRECISION NULL,
-                actual_price DOUBLE PRECISION NULL
+                coin_id TEXT,
+                current_price DOUBLE PRECISION,
+                predicted_price DOUBLE PRECISION,
+                signal TEXT,
+                confidence DOUBLE PRECISION,
+                factors TEXT,
+                created_at TIMESTAMP,
+                prediction_target_date DATE
             );
         """)
 

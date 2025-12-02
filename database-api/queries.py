@@ -1,6 +1,6 @@
 from db import get_connection
 from collections import defaultdict
-# from models.PricePrediction import PricePrediction
+from models.PricePrediction import PricePrediction
 from models.CoinClustered import CoinClustered
 from models.PriceResamplingAllField import PriceResamplingAllField
 from models.LineDiagramModel import LineDiagramModel
@@ -589,3 +589,44 @@ def get_dpo(coin: str, n: int, interval: str):
 # -----------------------------
 # END DPO CALCULATION FOR SEASONAL DIAGRAM
 # -----------------------------
+
+def get_latest_prediction(coin_id: str)-> PricePrediction:
+    """Lấy bản ghi dự đoán mới nhất cho coin_id"""
+    conn = get_connection()
+    if not conn:
+        return None
+    
+    try:
+        cur = conn.cursor()
+        query = """
+            SELECT coin_id,current_price, predicted_price, signal, confidence, factors, prediction_target_date, created_at
+            FROM price_predictions
+            WHERE coin_id = %s
+            ORDER BY created_at DESC
+            LIMIT 1
+        """
+        cur.execute(query, (coin_id,))
+        row = cur.fetchone()
+        cur.close()
+        
+        if row:
+            # Map dữ liệu từ tuple sang dictionary khớp với Pydantic Model
+            return PricePrediction(
+                coin_id=row[0],
+                current_price=row[1],
+                predicted_price=row[2],
+                signal=row[3],
+                confidence=row[4],
+                factors=row[5],
+                prediction_target_date=row[6],
+                created_at=row[7]
+            )
+        return None
+    except Exception as e:
+        logging.error(f"Error fetching prediction for {coin_id}: {e}")
+        return None
+    finally:
+        conn.close()
+#-----------------------------
+# END GET PRICE PREDICTIONS 
+#-----------------------------
