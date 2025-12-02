@@ -1,5 +1,5 @@
 class ApiService {
-    static BASE_URL = "http://localhost:8002";
+    static BASE_URL = "http://52.77.169.173:8002";
 
     static async fetchFromApi(endpoint) {
         try {
