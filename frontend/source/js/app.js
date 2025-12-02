@@ -10,7 +10,7 @@ class App {
     };
 
     this.dashboardTimeframe = "week"; // Mặc định 1 tháng
-    this.analysisTimeframe = "1h";  // Mặc định 1 giờ cho chart chi tiết
+    this.analysisTimeframe = "day";  // Mặc định 1 giờ cho chart chi tiết
 
     this.indicators = {
       ma: false,
@@ -253,7 +253,7 @@ class App {
         indicators: this.indicators
       }
     };
-    TradingChart.render(chartPayload);
+    TradingChart.render(apiData.lineData);
 
     // B. Seasonal Chart (DPO) - Truyền data đã map
     SeasonalChart.render(apiData.seasonalData);

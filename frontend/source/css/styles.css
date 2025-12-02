@@ -445,11 +445,9 @@ body {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Thêm bóng đổ nhẹ cho nổi bật */
 }
 
-.chart-section .chart-wrapper {
+.chart-wrapper {
     width: 100%;
-    /* [QUAN TRỌNG] Set chiều cao cứng cho phần vẽ chart (trừ đi phần Header) */
-    /* Cha cao 400px, Header khoảng 40px + Padding -> Còn lại khoảng 320px */
-    height: 320px; 
+    height: auto; 
     flex: none; /* Bỏ flex để tránh lỗi tính toán sai height */
 }
 

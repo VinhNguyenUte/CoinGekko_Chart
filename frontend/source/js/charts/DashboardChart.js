@@ -1,8 +1,33 @@
 class DashboardChart {
     static renderCorrelationHeatmap(matrix) {        
+        const chartId = "correlation-heatmap";
+
         if (!matrix || !matrix.correlations || !matrix.coins) {
             console.warn("DashboardChart: No matrix data available to render.");
+            this.showErrorState(chartId, "Không có dữ liệu để hiển thị.");
             return;
+        }
+
+        const coins = matrix.coins;
+        const correlations = matrix.correlations;
+        const numCoins = coins.length;
+        const numRows = correlations.length;
+
+        this.clearErrorState(chartId);
+
+        if (numRows !== numCoins) {
+            console.warn(`Mismatch: ${numCoins} coins nhưng có ${numRows} hàng dữ liệu.`);
+            // Bây giờ chartId đã được định nghĩa, hàm này sẽ chạy đúng
+            this.showErrorState(chartId, `Dữ liệu không đồng bộ (Lệch: ${numCoins} coin vs ${numRows} hàng).`);
+            return;
+        }
+
+        for (let i = 0; i < numRows; i++) {
+            if (correlations[i].length !== numCoins) {
+                console.warn(`Mismatch at row ${i}: Cần ${numCoins} cột, tìm thấy ${correlations[i].length}.`);
+                this.showErrorState(chartId, `Dữ liệu bị thiếu sót tại hàng ${coins[i]}.`);
+                return;
+            }
         }
 
         // 2. Format giá trị hiển thị (2 số thập phân)
@@ -73,5 +98,39 @@ class DashboardChart {
 
         // Vẽ biểu đồ vào div có id="correlation-heatmap"
         Plotly.newPlot("correlation-heatmap", [trace], layout, config);
+    }
+
+    static clearErrorState(containerId) {
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.removeAttribute("style");
+            container.innerHTML = ""; // Xóa sạch nội dung cũ
+        }
+    }
+
+    static showErrorState(containerId, message) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        // Xóa biểu đồ Plotly nếu đang có để tránh đè lên nhau
+        try { Plotly.purge(containerId); } catch (e) {}
+
+        // Render giao diện lỗi
+        container.innerHTML = `
+            <div style="
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+                justify-content: center; 
+                height: 100%; 
+                width: 100%;
+                color: #ff5766; 
+                background: rgba(26, 31, 46, 0.8);
+                text-align: center;
+                padding: 20px;">
+                <span style="font-size: 32px; margin-bottom: 12px;">⚠️</span>
+                <span style="font-size: 14px; font-weight: 500;">${message}</span>
+            </div>
+        `;
     }
 }

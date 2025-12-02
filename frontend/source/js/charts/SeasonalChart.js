@@ -1,14 +1,31 @@
 class SeasonalChart {
     static render(data) {
-        // Kiểm tra dữ liệu
-        if (!data || !data.dates || data.dates.length === 0) {
-            console.warn("SeasonalChart: Dữ liệu DPO không hợp lệ hoặc rỗng.");
-            Plotly.purge("seasonal-chart"); 
+        const chartId = "seasonal-chart";
+
+        console.log(data)
+
+        // 2. Validate dữ liệu đầu vào
+        if (!data || !data.dates || !data.values) {
+            this.showErrorState(chartId, "Không có dữ liệu DPO để hiển thị.");
             return;
         }
 
         const dates = data.dates;
-        const dpoValues = data.values; 
+        const dpoValues = data.values;
+
+        // Kiểm tra độ dài mảng
+        if (dates.length !== dpoValues.length) {
+            this.showErrorState(chartId, `Lỗi dữ liệu: Thời gian (${dates.length}) và Giá trị (${dpoValues.length}) không khớp.`);
+            return;
+        }
+
+        if (dates.length < 5) {
+            this.showErrorState(chartId, "Dữ liệu quá ít để vẽ biểu đồ.");
+            return;
+        }
+
+        // 3. Xóa lỗi cũ trước khi vẽ (Logic mới cập nhật)
+        this.clearErrorState(chartId);
 
         // 1. Tạo Trace
         const trace = {
@@ -117,5 +134,38 @@ class SeasonalChart {
         };
 
         Plotly.newPlot("seasonal-chart", [trace], layout, config);
+    }
+
+    static clearErrorState(containerId) {
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.removeAttribute("style");
+            container.innerHTML = ""; // Xóa sạch nội dung cũ
+        }
+    }
+
+    static showErrorState(containerId, message) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        // Xóa biểu đồ Plotly cũ
+        try { Plotly.purge(containerId); } catch (e) {}
+
+        container.innerHTML = `
+            <div style="
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+                justify-content: center; 
+                height: 100%; 
+                width: 100%;
+                color: #ff5766; 
+                background: rgba(26, 31, 46, 0.8);
+                text-align: center;
+                padding: 10px;">
+                <span style="font-size: 24px; margin-bottom: 8px;">⚠️</span>
+                <span style="font-size: 13px;">${message}</span>
+            </div>
+        `;
     }
 }

@@ -14,6 +14,11 @@ class DistributionChart {
         const mean = stats.mean;
         const std = stats.std_dev;
 
+        if (data.daily_returns.length < 5) {
+            this.showErrorState(chartId, "Dữ liệu quá ít để vẽ biểu đồ.");
+            return;
+        }
+
         // 2. TẠO TRACE HISTOGRAM (Cột)
         const trace1 = {
             x: returns,

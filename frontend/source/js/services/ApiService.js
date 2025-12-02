@@ -1,5 +1,5 @@
 class ApiService {
-    static BASE_URL = "https://e9771683-a681-4b84-9931-d992b713ce4b.mock.pstmn.io";
+    static BASE_URL = "https://984ebc23-11b4-4ab3-ba98-cc024f482a03.mock.pstmn.io";
 
     // Hàm gọi API chung (Helper)
     static async fetchFromApi(endpoint) {
