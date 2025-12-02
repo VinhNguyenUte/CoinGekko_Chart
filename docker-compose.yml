@@ -17,25 +17,6 @@ services:
       timeout: 5s
       retries: 5
       
-  # gateway:
-  #   build: ./api-gateway
-  #   container_name: gateway
-  #   ports:
-  #     - "8000:8000"
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #     ingestion:
-  #       condition: service_started
-  #     analysis:
-  #       condition: service_started
-  #     prediction:
-  #       condition: service_started
-  #     clustering:
-  #       condition: service_started
-  #   networks:
-  #     - appnet
-
   ingestion:
     build: ./ingestion-service
     container_name: ingestion

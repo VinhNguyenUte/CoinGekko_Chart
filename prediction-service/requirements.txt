@@ -1,1 +1,8 @@
-flask
+requests
+psycopg2-binary
+schedule
+pandas
+scikit-learn
+numpy
+uvicorn
+fastapi[standard]

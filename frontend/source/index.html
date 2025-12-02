@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoLens - Trading Dashboard</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Left Sidebar Navigation with Watchlist -->
+        <aside class="sidebar">
+            <!-- Logo -->
+            <div class="sidebar-header">
+                <div class="logo">💎 CryptoLens</div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Dashboard</span>
+                </button>
+                <button class="nav-item" data-page="analysis">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-label">Analysis</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-divider"></div>
+
+            <!-- Watchlist Section -->
+            <div class="watchlist-section">
+                <div class="watchlist-title">WATCHLIST</div>
+                <div class="watchlist-items">
+                    <button class="watchlist-item active" data-coin="bitcoin">
+                        <div class="coin-icon" style="background: linear-gradient(135deg, #FF9F00, #FFC107);">B</div>
+                        <div class="coin-info">
+                            <div class="coin-name">Bitcoin</div>
+                            <div class="coin-symbol">BTC</div>
+                        </div>
+                        <div class="coin-change positive">+2.4%</div>
+                    </button>
+                    <button class="watchlist-item" data-coin="ethereum">
+                        <div class="coin-icon" style="background: linear-gradient(135deg, #627EEA, #64B5F6);">E</div>
+                        <div class="coin-info">
+                            <div class="coin-name">Ethereum</div>
+                            <div class="coin-symbol">ETH</div>
+                        </div>
+                        <div class="coin-change positive">+1.8%</div>
+                    </button>
+                    <button class="watchlist-item" data-coin="bnb">
+                        <div class="coin-icon" style="background: linear-gradient(135deg, #FFB81C, #FFA500);">N</div>
+                        <div class="coin-info">
+                            <div class="coin-name">BNB</div>
+                            <div class="coin-symbol">BNB</div>
+                        </div>
+                        <div class="coin-change negative">-0.5%</div>
+                    </button>
+                    <button class="watchlist-item" data-coin="solana">
+                        <div class="coin-icon" style="background: linear-gradient(135deg, #00D4AA, #14F195);">S</div>
+                        <div class="coin-info">
+                            <div class="coin-name">Solana</div>
+                            <div class="coin-symbol">SOL</div>
+                        </div>
+                        <div class="coin-change positive">+5.2%</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <button id="global-refresh-btn" class="sidebar-action-btn">
+                    <span class="icon">🔄</span>
+                    <span class="label">Update Data</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="page active">
+                <div class="chart-box">
+                    <div class="chart-header">
+                        <div class="header-title">
+                            <h1>Correlation Heatmap Dashboard</h1>
+                        </div>
+                        <div class="header-toolbar">
+                            <button class="timeframe-btn active" data-timeframe="week">1 Week</button>
+                            <button class="timeframe-btn" data-timeframe="month">1 Month</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <div id="correlation-heatmap" class="chart-wrapper"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis Page -->
+            <div id="analysis-page" class="page">
+                <div class="chart-header">
+                    <div class="header-title">
+                        <h1 id="coin-name">Bitcoin</h1>
+                        <div class="coin-price">
+                            <span id="current-price">$95,000.00</span>
+                            <span id="price-change" class="change positive">+2.4%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-box">
+                    <div class="trading-toolbar">
+                        <div class="toolbar-section">
+                            <span class="section-label">Timeframes</span>
+                            <div class="timeframe-group">
+                                <button class="tf-btn active" data-timeframe="1h">1h</button>
+                                <button class="tf-btn" data-timeframe="day">1d</button>
+                                <button class="tf-btn" data-timeframe="week">1w</button>
+                                <button class="tf-btn" data-timeframe="month">1m</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="charts-section">
+                        <div class="main-chart-container">
+                            <div class="section-header">
+                                <h3>Line Chart</h3>
+                            </div>
+                            <div class="chart-wrapper chart-wrapper-relative">
+                                <div id="price-legend" class="chart-legend-overlay"></div>
+                                <div id="trading-chart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-box">
+                    <div class="chart-row-split">
+                        <div class="chart-section">
+                            <div class="section-header">
+                                <h3>Volume-Price Correlation</h3>
+                            </div>
+
+                            <div class="chart-wrapper chart-wrapper-relative">
+                                <div id="scatter-legend" class="chart-legend-overlay"></div>
+                                <div id="scatter-chart" style="width: 100%; height: 100%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="chart-section">
+                            <div class="section-header">
+                                <h3>Return Distribution</h3>
+                            </div>
+                            <div id="histogram-chart" class="chart-wrapper"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-box">
+                    <div class="chart-section" style="height: 400px;">
+                        <div class="section-header"
+                            style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3>Seasonal Cycle (DPO)</h3>
+
+                            <div class="seasonal-toolbar">
+                                <button class="dpo-btn" data-config="7">DPO 7</button>
+                                <button class="dpo-btn active" data-config="21">DPO 21</button> <button class="dpo-btn"
+                                    data-config="24">DPO 24</button>
+                            </div>
+                        </div>
+                        <div id="seasonal-chart" class="chart-wrapper"></div>
+                    </div>
+                </div>
+            </div>
+    </div>
+    </main>
+    </div>
+
+    <script src="js/utils/DataGenerator.js"></script>
+    <script src="js/services/ApiService.js"></script>
+
+    <script src="js/charts/DashboardChart.js"></script>
+    <script src="js/charts/TradingChart.js"></script>
+    <script src="js/charts/VolumePriceChart.js"></script>
+    <script src="js/charts/DistributionChart.js"></script>
+    <script src="js/charts/SeasonalChart.js"></script>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>
