@@ -32,7 +32,8 @@ class ApiService {
             this.getLineChartData(coinId, timeframe),
             this.getSeasonalChartData(coinId, timeframe, indicatorConfig),
             this.getScatterChartData(coinId, timeframe),
-            this.getHistogramChartData(coinId, timeframe)
+            this.getHistogramChartData(coinId, timeframe),
+            this.getSignalData(coinId)
         ]);
 
         return {
@@ -43,6 +44,10 @@ class ApiService {
             histogramData: histogram,
             signalData: signal
         };
+    }
+
+    static async getSignalData(coin, timeframe) {
+        return await this.fetchFromApi(`/prediction?coin=${coin}`);
     }
 
     static async getLineChartData(coin, timeframe) {

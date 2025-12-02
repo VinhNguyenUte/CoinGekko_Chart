@@ -194,16 +194,74 @@ class App {
   renderAnalysisPage() {
     const cacheKey = `${this.currentCoin}_${this.analysisTimeframe}`;
     const apiData = this.dataCache.analysis[cacheKey];
+    const signalData = apiData.signalData;
 
-    if (!apiData) return;
-    
     console.log(apiData)
 
+    if (!apiData) return;
+
+    if (signalData) {
+        // --- Mapping UI Elements ---
+        const elName = document.getElementById('coin-name');
+        const elSymbol = document.getElementById('detail-symbol');
+        const elCurrentPrice = document.getElementById('detail-current-price');
+        const elSignalCard = document.getElementById('ai-signal-card');
+        const elSignalText = document.getElementById('signal-text');
+        const elSignalDate = document.getElementById('signal-date');
+        const elConfidence = document.getElementById('signal-confidence');
+        const elProgress = document.getElementById('signal-progress');
+        const elPredPrice = document.getElementById('detail-predicted-price');
+        const elFactors = document.getElementById('signal-factors');
+
+        // --- Điền dữ liệu ---
+        elName.textContent = this.currentCoin.toUpperCase(); // Hoặc lấy từ signalData.coin_id
+        elSymbol.textContent = (signalData.coin_id || this.currentCoin).toUpperCase();
+        
+        // Format tiền tệ ($87,156.08)
+        const fmtPrice = (price) => `$${Number(price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        
+        elCurrentPrice.textContent = fmtPrice(signalData.current_price);
+        elPredPrice.textContent = fmtPrice(signalData.predicted_price);
+        
+        // Xử lý màu sắc Tín hiệu (Signal)
+        elSignalCard.className = 'ai-signal-box'; // Reset class
+        const sig = signalData.signal.toUpperCase(); // "SELL"
+        elSignalText.textContent = sig;
+        
+        if (sig === 'BUY' || sig === 'STRONG BUY') elSignalCard.classList.add('buy');
+        else if (sig === 'SELL' || sig === 'STRONG SELL') elSignalCard.classList.add('sell');
+        else elSignalCard.classList.add('neutral');
+
+        // Xử lý Confidence & Date
+        elConfidence.textContent = `${signalData.confidence}%`;
+        elProgress.style.width = `${signalData.confidence}%`;
+        
+        // Format ngày (YYYY-MM-DD -> DD/MM/YYYY)
+        const dateObj = new Date(signalData.prediction_target_date);
+        elSignalDate.textContent = dateObj.toLocaleDateString('en-GB'); // 03/12/2025
+
+        elFactors.innerHTML = signalData.factors.replace('|', '<br/>');
+
+        if (signalData.created_at) {
+            const creationDate = new Date(signalData.created_at);
+
+            // Định dạng: VD 12/02/2025 11:12 AM
+            const formattedDate = `${creationDate.toLocaleDateString()} ${creationDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            
+            // Tìm và cập nhật element trong UI (Sử dụng ID mới)
+            const dateEl = document.getElementById("signal-created-at");
+            
+            if (dateEl) {
+                dateEl.textContent = formattedDate; // Không cần "Generated" vì đã có label
+            }
+        }
+    }
+
     const coinNames = { bitcoin: "Bitcoin", ethereum: "Ethereum", bnb: "BNB", solana: "Solana", tether: "Tether" };
-    const displayName = coinNames[this.currentCoin] || this.currentCoin.toUpperCase();
-    
+    const displayName = coinNames[this.coin_id];
     document.getElementById("coin-name").textContent = displayName;
-    
+
+    SignalCard.render(apiData.signalData);
     TradingChart.render(apiData.lineData);
     SeasonalChart.render(apiData.seasonalData);
     VolumePriceChart.render(apiData.scatterData);

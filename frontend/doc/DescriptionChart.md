@@ -1,7 +1,7 @@
 # Phân tích sơ đồ
 
 ## LineDiagram: 
-### Tên biểu đồ: Price Trend & Prediction Chart (Biểu đồ xu hướng giá & Dự báo).
+### Tên biểu đồ: Price Trend.
 ### Mục đích : xem lịch sử giá đóng cửa theo thời gian, chỉ báo của giá (MSI, MA, ...)
 ### Ý nghĩa: 
 - Phân tích giá biến động theo xu hướng nào trong bộ lọc thời gian 
@@ -101,7 +101,7 @@
 _________________________________________________________________________________________________________________
 
 ## ScatterDiagram:
-### Tên biểu đồ: Volume-Price Correlation Scatter (Biểu đồ tương quan thanh khoản - Giá)
+### Tên biểu đồ: Volume-Price Correlation Scatter
 ### Mục đích : 
 - Biến động giá có được xác nhận bởi thanh khoản (Volume)
 - Phát hiện điểm bất thường
@@ -183,7 +183,7 @@ ________________________________________________________________________________
 _________________________________________________________________________________________________________________
 
 ## HistogramDiagram:
-### Tên biểu đồ: Return Distribution Histogram (Biểu đồ phân phối lợi nhuận).
+### Tên biểu đồ: Return Distribution.
 ### Mục đích : 
 - Đánh giá mức độ ổn định hoặc rủi ro của đồng coin.
 - Xem tần suất xuất hiện của các đợt tăng/giảm giá mạnh.
@@ -264,7 +264,7 @@ ________________________________________________________________________________
 _________________________________________________________________________________________________________________
 
 ## SeasonalLineDiagram:
-### Tên biểu đồ: Seasonal Cycle Chart (DPO) (Biểu đồ Chu kỳ Mùa vụ DPO).
+### Tên biểu đồ: Detrended Price Oscillator (DPO)
 ### Mục đích: 
 - Tách bỏ xu hướng dài hạn (Trend) để lộ ra các chu kỳ dao động ngắn hạn
 - Xác định xem giá hiện tại đang ở Đỉnh sóng (Quá cao so với mức trung bình) hay Đáy sóng (Quá thấp so với mức trung bình) của chu kỳ đó
@@ -336,7 +336,7 @@ ________________________________________________________________________________
 _________________________________________________________________________________________________________________
 
 ## CorrelationHeatmap:
-### Tên biểu đồ: Cross-Asset Correlation Matrix (Ma trận Tương quan Đa tài sản).
+### Tên biểu đồ: Market Correlation Matrix
 ### Mục đích: 
 - Tìm mối liên hệ giữa các đồng coin (hoặc các chỉ số).
 - Giúp nhà đầu tư cơ cấu danh mục (Ví dụ: Không nên mua cả BTC và ETH nếu chúng giống hệt nhau, hãy mua 1 con coin nghịch đảo để giảm rủi ro).

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CryptoLens - Trading Dashboard</title>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 </head>
 
@@ -51,14 +52,14 @@
                         </div>
                     </button>
                     <button class="watchlist-item" data-coin="dogecoin">
-                        <div class="coin-icon" style="background: linear-gradient(135deg, #00ff66, #FFA500);">D</div>
+                        <div class="coin-icon" style="background: linear-gradient(135deg, #FFB81C, #FFA500);">D</div>
                         <div class="coin-info">
                             <div class="coin-name">Dogecoin</div>
                             <div class="coin-symbol">DOGE</div>
                         </div>
                     </button>
                     <button class="watchlist-item" data-coin="tether">
-                        <div class="coin-icon" style="background: linear-gradient(135deg, #98d400, #8f0303);">T</div>
+                        <div class="coin-icon" style="background: linear-gradient(135deg, #2e00d4, #1418f1);">T</div>
                         <div class="coin-info">
                             <div class="coin-name">Tether</div>
                             <div class="coin-symbol">USDT</div>
@@ -89,7 +90,7 @@
                 <div class="chart-box">
                     <div class="chart-header">
                         <div class="header-title">
-                            <h1>Correlation Heatmap Dashboard</h1>
+                            <h1>Market Correlation Matrix</h1>
                         </div>
                         <div class="header-toolbar">
                             <button class="timeframe-btn active" data-timeframe="week">1 Week</button>
@@ -103,11 +104,50 @@
             </div>
 
             <div id="analysis-page" class="page">
-                <div class="chart-header">
-                    <div class="header-title">
-                        <h1 id="coin-name">Bitcoin</h1>
-                        <div class="coin-price">
-                            <span id="current-price">Thay giá tại đây</span>
+                <div class="signal-dashboard-container">
+                    <div class="coin-status-box">
+                        <div class="coin-identity">
+                            <i class="fa-solid fa-coins"></i>
+                            <div class="coin-text">
+                                <h1 id="coin-name">Bitcoin</h1>
+                                <span id="detail-symbol" class="badge-symbol">BTC</span>
+                            </div>
+                        </div>
+                        <div class="price-block">
+                            <span class="label">Current Price</span>
+                            <div class="price-value" id="detail-current-price">Loading...</div>
+                        </div>
+                    </div>
+
+                    <div class="ai-signal-box" id="ai-signal-card">
+                        <div class="signal-top">
+                            <span class="signal-badge">AI SIGNAL</span>
+                            <span class="signal-date" id="signal-date">--/--/----</span>
+                        </div>
+                        <div class="signal-main">
+                            <h2 id="signal-text">NEUTRAL</h2>
+                            <div class="confidence-wrapper">
+                                <span>Confidence: <b id="signal-confidence">0%</b></span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" id="signal-progress" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="prediction-box">
+                        <div class="target-price-block">
+                            <span class="label">Predicted Price (Target)</span>
+                            <div class="price-value target" id="detail-predicted-price">Loading...</div>
+                        </div>
+                        <div class="factors-block">
+                            <span class="label">Key Factors</span>
+                            <p id="signal-factors" class="factors-text">Waiting for analysis...</p>
+                        </div>
+
+                        <div class="timestamp-info">
+                            <span class="label">Prediction Generated:</span>
+                            <span id="signal-created-at" class="value">Waiting for API...</span>
                         </div>
                     </div>
                 </div>
@@ -115,7 +155,7 @@
                 <div class="chart-box">
                     <div class="trading-toolbar">
                         <div class="toolbar-section">
-                            <span class="section-label">Timeframes</span>
+                            <span class="section-label">Time frames</span>
                             <div class="timeframe-group">
                                 <button class="tf-btn active" data-timeframe="day">1d</button>
                                 <button class="tf-btn" data-timeframe="week">1w</button>
@@ -127,7 +167,7 @@
                     <div class="charts-section">
                         <div class="main-chart-container">
                             <div class="section-header">
-                                <h3>Line Chart</h3>
+                                <h3>Price Trend</h3>
                             </div>
                             <div class="chart-wrapper chart-wrapper-relative">
                                 <div id="price-legend" class="chart-legend-overlay"></div>
@@ -141,7 +181,7 @@
                     <div class="chart-row-split">
                         <div class="chart-section">
                             <div class="section-header">
-                                <h3>Volume-Price Correlation</h3>
+                                <h3>Volume-Price Correlation Scatter</h3>
                             </div>
 
                             <div class="chart-wrapper chart-wrapper-relative">
@@ -163,7 +203,7 @@
                     <div class="chart-section">
                         <div class="section-header"
                             style="display: flex; justify-content: space-between; align-items: center;">
-                            <h3>Seasonal Cycle (DPO)</h3>
+                            <h3>Detrended Price Oscillator</h3>
 
                             <div class="seasonal-toolbar">
                                 <button class="dpo-btn" data-config="3">DPO 3</button>
@@ -181,6 +221,7 @@
     <script src="js/services/ApiService.js"></script>
 
     <script src="js/charts/DashboardChart.js"></script>
+    <script src="js/card/SignalCard.js"></script>
     <script src="js/charts/TradingChart.js"></script>
     <script src="js/charts/VolumePriceChart.js"></script>
     <script src="js/charts/DistributionChart.js"></script>

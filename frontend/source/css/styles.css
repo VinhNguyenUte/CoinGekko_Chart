@@ -25,7 +25,8 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
-  overflow: hidden; /* Ngăn cuộn ở body, chỉ cuộn ở main-content */
+  overflow: hidden;
+  /* Ngăn cuộn ở body, chỉ cuộn ở main-content */
 }
 
 .app-container {
@@ -43,7 +44,8 @@ body {
   flex-direction: column;
   overflow-y: auto;
   padding: 16px 0;
-  flex-shrink: 0; /* Không bị co lại khi màn hình nhỏ */
+  flex-shrink: 0;
+  /* Không bị co lại khi màn hình nhỏ */
 }
 
 .sidebar-header {
@@ -70,7 +72,8 @@ body {
 .sidebar-footer {
   padding: 16px;
   border-top: 1px solid var(--border-color);
-  background: var(--bg-secondary); /* Đảm bảo nền trùng sidebar */
+  background: var(--bg-secondary);
+  /* Đảm bảo nền trùng sidebar */
 }
 
 /* 2. Style cho nút Refresh mới */
@@ -103,18 +106,23 @@ body {
 
 /* Hiệu ứng xoay khi loading */
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .is-loading .icon {
-    display: inline-block;
-    animation: spin 1s linear infinite;
+  display: inline-block;
+  animation: spin 1s linear infinite;
 }
 
 .is-loading {
-    opacity: 0.7;
-    pointer-events: none;
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 .nav-item {
@@ -245,7 +253,7 @@ body {
 .main-content {
   flex: 1;
   /* Đây là nơi duy nhất xử lý scroll dọc cho nội dung chính */
-  overflow-y: auto; 
+  overflow-y: auto;
   background: var(--bg-primary);
   display: flex;
   flex-direction: column;
@@ -256,17 +264,23 @@ body {
   /* Bỏ overflow-y: auto ở đây để tránh scroll lồng nhau */
   padding: 16px 24px;
   /* Thêm khoảng trống dưới cùng để scroll thoải mái */
-  padding-bottom: 50px; 
+  padding-bottom: 50px;
 }
 
 .page.active {
-  display: block; /* Dùng block thay vì flex để content chảy dọc tự nhiên */
+  display: block;
+  /* Dùng block thay vì flex để content chảy dọc tự nhiên */
   animation: fadeIn 0.3s ease;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 /* ============ DASHBOARD PAGE ============ */
@@ -275,6 +289,195 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+}
+
+/* === SIGNAL DASHBOARD STYLES === */
+.signal-dashboard-container {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  gap: 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  align-items: stretch;
+}
+
+/* Cột 1: Coin Info */
+.coin-status-box {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid var(--border-color);
+  padding-right: 20px;
+}
+
+.coin-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.coin-icon-lg {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #fff;
+  background: #f7931a;
+  /* Mặc định */
+}
+
+.badge-symbol {
+  background: var(--bg-tertiary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.price-block .label,
+.prediction-box .label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.price-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: 'Roboto Mono', monospace;
+}
+
+/* Cột 2: AI Signal */
+.ai-signal-box {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+/* Trạng thái màu sắc cho Signal */
+.ai-signal-box.buy {
+  border-color: var(--neon-green);
+  background: rgba(0, 255, 136, 0.05);
+}
+
+.ai-signal-box.sell {
+  border-color: var(--neon-red);
+  background: rgba(255, 51, 102, 0.05);
+}
+
+.ai-signal-box.neutral {
+  border-color: var(--neon-yellow);
+  background: rgba(251, 191, 36, 0.05);
+}
+
+.signal-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.signal-main h2 {
+  font-size: 36px;
+  font-weight: 800;
+  margin: 0 0 10px 0;
+  letter-spacing: 1px;
+}
+
+.buy h2 {
+  color: var(--neon-green);
+  text-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+.sell h2 {
+  color: var(--neon-red);
+  text-shadow: 0 0 15px rgba(255, 51, 102, 0.3);
+}
+
+.neutral h2 {
+  color: var(--neon-yellow);
+}
+
+.confidence-wrapper {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--text-secondary);
+  transition: width 0.5s;
+}
+
+.buy .progress-fill {
+  background: var(--neon-green);
+}
+
+.sell .progress-fill {
+  background: var(--neon-red);
+}
+
+/* Cột 3: Prediction & Factors */
+.prediction-box {
+  padding-left: 20px;
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.price-value.target {
+  color: var(--neon-blue);
+}
+
+.factors-text {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-top: 4px;
+  border-left: 2px solid var(--border-color);
+  padding-left: 8px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 900px) {
+  .signal-dashboard-container {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .coin-status-box,
+  .prediction-box {
+    border: none;
+    padding: 0;
+  }
 }
 
 .header-title h1 {
@@ -399,7 +602,8 @@ body {
   flex-direction: column;
   gap: 12px;
   margin-bottom: 20px;
-  flex: none; /* Không co giãn, giữ đúng chiều cao nội dung */
+  flex: none;
+  /* Không co giãn, giữ đúng chiều cao nội dung */
   height: auto;
 }
 
@@ -408,7 +612,7 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 12px;
-  height: auto; 
+  height: auto;
   display: flex;
   flex-direction: column;
 }
@@ -427,32 +631,40 @@ body {
 /* ============ ANALYSIS GRID (BOTTOM CHARTS) ============ */
 .analysis-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); /* Tăng min-width lên xíu cho đẹp */
-  gap: 24px; /* [FIX] Tăng khoảng cách giữa các chart (Margin) */
-  padding-bottom: 40px; /* Khoảng trống dưới cùng để scroll thoải mái */
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  /* Tăng min-width lên xíu cho đẹp */
+  gap: 24px;
+  /* [FIX] Tăng khoảng cách giữa các chart (Margin) */
+  padding-bottom: 40px;
+  /* Khoảng trống dưới cùng để scroll thoải mái */
 }
 
 .chart-section {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 8px; /* Bo góc mềm mại hơn */
-  padding: 20px; /* [FIX] Tăng padding trong khung */
-  
+  border-radius: 8px;
+  /* Bo góc mềm mại hơn */
+  padding: 20px;
+  /* [FIX] Tăng padding trong khung */
+
   /* Chiều cao tổng của khung chart nhỏ */
-  height: 400px; 
+  height: 400px;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Thêm bóng đổ nhẹ cho nổi bật */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  /* Thêm bóng đổ nhẹ cho nổi bật */
 }
 
 .chart-wrapper {
-    width: 100%;
-    height: auto; 
-    flex: none; /* Bỏ flex để tránh lỗi tính toán sai height */
+  width: 100%;
+  height: auto;
+  flex: none;
+  /* Bỏ flex để tránh lỗi tính toán sai height */
 }
 
 .section-header {
-  margin-bottom: 16px; /* Tăng khoảng cách giữa tiêu đề và chart */
+  margin-bottom: 16px;
+  /* Tăng khoảng cách giữa tiêu đề và chart */
   padding-bottom: 12px;
   border-bottom: 1px solid var(--border-color);
 }
@@ -469,18 +681,20 @@ body {
   top: 10px;
   left: 10px;
   z-index: 10;
-  font-family: 'Roboto Mono', monospace; 
+  font-family: 'Roboto Mono', monospace;
   font-size: 12px;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  pointer-events: none; /* Chuột xuyên qua để thao tác chart */
+  pointer-events: none;
+  /* Chuột xuyên qua để thao tác chart */
 }
 
 .legend-row {
   display: flex;
   gap: 12px;
-  pointer-events: auto; /* Bật lại chuột cho các text để click */
+  pointer-events: auto;
+  /* Bật lại chuột cho các text để click */
 }
 
 .legend-item {
@@ -488,7 +702,8 @@ body {
   display: flex;
   gap: 4px;
   transition: opacity 0.2s;
-  background: rgba(26, 31, 46, 0.7); /* Nền mờ nhẹ để dễ đọc nếu nến đè lên */
+  background: rgba(26, 31, 46, 0.7);
+  /* Nền mờ nhẹ để dễ đọc nếu nến đè lên */
   padding: 2px 4px;
   border-radius: 4px;
 }
@@ -517,8 +732,8 @@ body {
 }
 
 .js-plotly-plot .plotly .modebar {
-    left: auto !important;
-    right: 0 !important;
+  left: auto !important;
+  right: 0 !important;
 }
 
 /* ============ SCROLLBAR ============ */
@@ -543,7 +758,8 @@ body {
 /* ============ RESPONSIVE ============ */
 @media (max-width: 1400px) {
   .analysis-grid {
-    grid-template-columns: 1fr 1fr; /* 2 cột */
+    grid-template-columns: 1fr 1fr;
+    /* 2 cột */
   }
 }
 
@@ -551,8 +767,10 @@ body {
   .sidebar {
     width: 240px;
   }
+
   .analysis-grid {
-    grid-template-columns: 1fr; /* 1 cột */
+    grid-template-columns: 1fr;
+    /* 1 cột */
   }
 }
 
@@ -594,19 +812,22 @@ body {
   .watchlist-section {
     display: none;
   }
-  
+
   .main-chart-container {
-      height: 400px; /* Chart nhỏ hơn trên mobile */
+    height: 400px;
+    /* Chart nhỏ hơn trên mobile */
   }
 }
 
 
 /* ============ CHART BOX CONTAINERS (GREEN BOX) ============ */
 .chart-box {
-  background-color: #14F195; /* Màu xanh giống Main Chart */
-  padding: 20px;             /* Padding giống Main Chart */
-  border-radius: 6px;        /* Bo góc nhẹ */
-  margin-bottom: 24px;       /* Khoảng cách giữa các Box lớn */
+  padding: 20px;
+  /* Padding giống Main Chart */
+  border-radius: 6px;
+  /* Bo góc nhẹ */
+  margin-bottom: 24px;
+  /* Khoảng cách giữa các Box lớn */
   display: flex;
   flex-direction: column;
   width: auto;
@@ -616,8 +837,10 @@ body {
 /* Lưới chia đôi cho Scatter & Histogram */
 .chart-row-split {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Chia đôi 50-50 */
-  gap: 20px; /* Khoảng cách giữa 2 chart bên trong */
+  grid-template-columns: 1fr 1fr;
+  /* Chia đôi 50-50 */
+  gap: 20px;
+  /* Khoảng cách giữa 2 chart bên trong */
 }
 
 /* Đảm bảo chart-section bên trong Box xanh hiển thị đúng */
@@ -630,7 +853,7 @@ body {
   display: flex;
   flex-direction: column;
   /* Shadow giúp chart nổi bật trên nền xanh */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive: Trên màn hình nhỏ thì xếp chồng lên nhau */
@@ -639,33 +862,35 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
 /* ========================================
    PLOTLY CROSSHAIR CUSTOMIZATION (CSS)
 ======================================== */
 
 /* Can thiệp trực tiếp vào đường kẻ gióng (Spike Line) của Plotly */
-.js-plotly-plot .plotly .spikeline, 
+.js-plotly-plot .plotly .spikeline,
 .js-plotly-plot .plotly .cursor-crosshair {
-    
-    /* 1. Tạo hiệu ứng chấm bi (Dot) */
-    /* Cú pháp: [độ dài nét vẽ] [khoảng cách nghỉ] */
-    /* 1px vẽ, 3px nghỉ -> Ra hình chấm bi thưa và mảnh */
-    stroke-dasharray: 1 3 !important; 
 
-    /* 2. Đảm bảo độ mỏng tuyệt đối */
-    stroke-width: 1px !important;
+  /* 1. Tạo hiệu ứng chấm bi (Dot) */
+  /* Cú pháp: [độ dài nét vẽ] [khoảng cách nghỉ] */
+  /* 1px vẽ, 3px nghỉ -> Ra hình chấm bi thưa và mảnh */
+  stroke-dasharray: 1 3 !important;
 
-    /* 3. Ép màu xám (Ghi đè mọi màu khác) */
-    stroke: #ffffff !important;
+  /* 2. Đảm bảo độ mỏng tuyệt đối */
+  stroke-width: 1px !important;
 
-    /* 4. Xóa các hiệu ứng mờ/bóng thừa (nếu có) */
-    stroke-opacity: 1 !important;
-    shape-rendering: crispEdges !important; /* Làm nét đường kẻ, không bị nhòe */
+  /* 3. Ép màu xám (Ghi đè mọi màu khác) */
+  stroke: #ffffff !important;
+
+  /* 4. Xóa các hiệu ứng mờ/bóng thừa (nếu có) */
+  stroke-opacity: 1 !important;
+  shape-rendering: crispEdges !important;
+  /* Làm nét đường kẻ, không bị nhòe */
 }
 
 /* Ẩn hoàn toàn viền trắng (nếu nó là một element riêng biệt bao bên ngoài) */
 .js-plotly-plot .plotly .spikeline:nth-child(even) {
-    display: none !important;
+  display: none !important;
 }
 
 /* Thêm vào styles.css */
@@ -694,7 +919,8 @@ body {
 
 /* Trạng thái Active (Sáng lên) */
 .dpo-btn.active {
-  background: var(--accent-purple); /* Dùng màu tím cho hợp với Seasonal Chart */
+  background: var(--accent-purple);
+  /* Dùng màu tím cho hợp với Seasonal Chart */
   color: white;
   border-color: var(--accent-purple);
 }

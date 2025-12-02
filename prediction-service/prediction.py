@@ -312,7 +312,7 @@ if __name__ == "__main__":
         else:
             logging.info("🚀 First run detected (models exist). Starting server...")
             # Chạy trong thread riêng để không block việc start uvicorn
-            threading.Thread(target=run_prediction_task).start()
+            run_prediction_task()
     except Exception as e:
         logging.error(f"Startup error: {e}")
     
