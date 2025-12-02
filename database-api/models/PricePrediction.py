@@ -1,9 +1,13 @@
-# from pydantic import BaseModel
-# from typing import Optional
+from pydantic import BaseModel
+from datetime import date, datetime
+from typing import Optional
 
-# class PricePrediction(BaseModel):
-#     id: int
-#     coin_id: str
-#     coin_name: Optional[str] = None
-#     predicted_price: Optional[float] = None
-#     actual_price: Optional[float] = None
+class PricePrediction(BaseModel):
+    coin_id: str
+    current_price: float
+    predicted_price: float
+    signal: str
+    confidence: float
+    factors: str
+    prediction_target_date: date
+    created_at: datetime

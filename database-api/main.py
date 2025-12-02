@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, HTTPException
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
 from queries import (
@@ -11,10 +11,11 @@ from queries import (
     build_scatter_diagram,
     build_histogram_diagram,
     get_dpo,
-    get_dashboard_data
+    get_dashboard_data,
+    get_latest_prediction
 )
 
-# from models.PricePrediction import PricePrediction
+from models.PricePrediction import PricePrediction
 from models.CoinClustered import CoinClustered
 from models.PriceResampling import PriceResampling
 from models.LineDiagramModel import LineDiagramModel
@@ -150,3 +151,15 @@ def api_histogram_diagram(coin: str = Query("bitcoin"), type: str = Query("day")
 @app.get("/seasonal-diagram/dpo", response_model=DPOResponse)
 def api_price_resampling_dpo(coin: str, interval: str = "day", n: int = 21):
     return get_dpo(coin, n, interval)
+
+@app.get("/prediction", response_model=PricePrediction)
+def api_get_prediction(coin: str = Query("bitcoin")):
+    data = get_latest_prediction(coin)
+    if not data:
+        # Có thể trả về null hoặc raise 404 tùy logic frontend
+        # Ở đây trả về None để frontend dễ xử lý kiểm tra if (!data)
+        raise HTTPException(
+            status_code=404, 
+            detail=f"Chưa có dữ liệu dự đoán cho coin '{coin}' "
+        )
+    return data
