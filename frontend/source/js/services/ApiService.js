@@ -26,14 +26,8 @@ class ApiService {
         return null;
     }
 
-    static async getCoinHistory(coinId, timeframe = 'day', indicatorConfig = 21) { 
-        if (timeframe=="day")
-            indicatorConfig = 21;
-        else if (timeframe=="week")
-            indicatorConfig = 9;
-        else if (timeframe=="month")
-            indicatorConfig = 3;
-        
+    static async getCoinHistory(coinId, timeframe = 'day', indicatorConfig) { 
+
         const [line, seasonal, scatter, histogram, signal] = await Promise.all([
             this.getLineChartData(coinId, timeframe),
             this.getSeasonalChartData(coinId, timeframe, indicatorConfig),
@@ -52,23 +46,20 @@ class ApiService {
     }
 
     static async getLineChartData(coin, timeframe) {
-        return await this.fetchFromApi(`/analysis/line?coin=${coin}&timeframe=${timeframe}`);
+        return await this.fetchFromApi(`/line-diagram?coin=${coin}&type=${timeframe}`);
     }
 
     static async getSeasonalChartData(coin, timeframe, indicatorConfig = 21) {
-        const endpoint = `/analysis/seasonal?coin=${coin}&timeframe=${timeframe}&indicator_config=${indicatorConfig}`;
+        const endpoint = `/seasonal-diagram/dpo?coin=${coin}&interval=${timeframe}&n=${indicatorConfig}`;
         return await this.fetchFromApi(endpoint);
     }
 
     static async getScatterChartData(coin, timeframe) {
-        return await this.fetchFromApi(`/analysis/scatter?coin=${coin}&timeframe=${timeframe}`);
+        return await this.fetchFromApi(`/scatter-diagram?coin=${coin}&type=${timeframe}`);
     }
 
     static async getHistogramChartData(coin, timeframe) {
-        return await this.fetchFromApi(`/analysis/histogram?coin=${coin}&timeframe=${timeframe}`);
+        return await this.fetchFromApi(`/histogram-diagram?coin=${coin}&type=${timeframe}`);
     }
-    
-    static async getSignalData(coin, timeframe) {
-        return await this.fetchFromApi(`/analysis?coin=${coin}&timeframe=${timeframe}`);
-    }
+
 }

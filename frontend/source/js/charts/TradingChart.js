@@ -1,15 +1,15 @@
 class TradingChart {
     static render(data) {
         const chartId = "trading-chart";
-
-        if (!data || !data.dates || !data.prices) {
+        
+        if (!data || !data.timestamp || !data.price) {
             this.showErrorState(chartId, "Không có dữ liệu giá để hiển thị.");
             return;
         }
 
         const dates = data.timestamp;
         const prices = data.price;
-        const ma50 = data.ma_20 || [];
+        const ma20 = data.ma_20 || [];
         const bollUp = data.boll_upper || [];
         const bollLow = data.boll_lower || [];
         const rsi = data.rsi || [];
@@ -29,15 +29,6 @@ class TradingChart {
 
         this.clearErrorState(chartId);
 
-        const isValidIndicator = (arr) => {
-            if (!arr || arr.length === 0) return false;
-            if (arr.length !== dates.length) {
-                console.warn("TradingChart: Indicator length mismatch. Skipping render for this line.");
-                return false;
-            }
-            return true;
-        };
-
         const traces = [];
 
         traces.push({
@@ -50,12 +41,12 @@ class TradingChart {
         });
 
         traces.push({
-            x: dates, y: ma50,
-            name: "MA(50)", type: "scatter", mode: "lines",
+            x: dates, y: ma20,
+            name: "MA(20)", type: "scatter", mode: "lines",
             line: { color: "#ff9500", width: 1.5 },
             marker: { size: 5, color: '#ffffff', line: { width: 2, color: '#ff9500' } },
             hoverinfo: "y",
-            hovertemplate: "MA(50): %{y:,.2f}<extra></extra>",
+            hovertemplate: "MA(20): %{y:,.2f}<extra></extra>",
             visible: indicators.ma ? true : 'legendonly'
         });
 
@@ -121,7 +112,7 @@ class TradingChart {
             const lastIdx = dates.length - 1;
             const lastDataObj = {
                 price: prices[lastIdx],
-                ma_50: ma50[lastIdx],
+                ma_20: ma20[lastIdx],
                 boll_upper: bollUp[lastIdx],
                 boll_lower: bollLow[lastIdx],
                 rsi: rsi[lastIdx]
@@ -144,7 +135,7 @@ class TradingChart {
             </span>`;
 
         const findTraceIndex = (name) => graphDiv.data.findIndex(t => t.name === name);
-        const maIndex = findTraceIndex("MA(50)");
+        const maIndex = findTraceIndex("MA(20)");
         const bollStartIndex = findTraceIndex("BOLL_UP");
         const rsiIndex = findTraceIndex("RSI(14)");
         const isMaVisible = maIndex !== -1 && graphDiv.data[maIndex].visible === true;
@@ -153,7 +144,7 @@ class TradingChart {
         legendContainer.innerHTML = `
             <div class="legend-row">
                 ${createItem('lg-price', 'Price', lastData.price, '#00d084', true)}
-                ${createItem('lg-ma', 'MA(50)', lastData.ma_50, '#ff9500', isMaVisible)}
+                ${createItem('lg-ma', 'MA(20)', lastData.ma_20, '#ff9500', isMaVisible)}
                 ${createItem('lg-boll', 'BOLL', formatVal(lastData.boll_upper), '#a855f7', isBollVisible)}
             </div>
             ${indicators.rsi !== false ? `
@@ -186,14 +177,14 @@ class TradingChart {
             const idx = dataEvent.points[0].pointIndex;
             const d = {
                 price: rawData.prices ? rawData.prices[idx] : null,
-                ma_50: rawData.ma_50 ? rawData.ma_50[idx] : null,
+                ma_20: rawData.ma_20 ? rawData.ma_20[idx] : null,
                 boll_upper: rawData.boll_upper ? rawData.boll_upper[idx] : null,
                 boll_lower: rawData.boll_lower ? rawData.boll_lower[idx] : null,
                 rsi: rawData.rsi ? rawData.rsi[idx] : null
             };
             if (d) {
                 document.querySelector('#lg-price .legend-value').textContent = formatVal(d.price);
-                document.querySelector('#lg-ma .legend-value').textContent = formatVal(d.ma_50);
+                document.querySelector('#lg-ma .legend-value').textContent = formatVal(d.ma_20);
                 const up = formatVal(d.boll_upper);
                 const low = formatVal(d.boll_lower);
                 document.querySelector('#lg-boll .legend-value').textContent = (up === 'N/A') ? 'N/A' : `${up} / ${low}`;
@@ -205,7 +196,7 @@ class TradingChart {
 
         graphDiv.on('plotly_unhover', () => {
             document.querySelector('#lg-price .legend-value').textContent = formatVal(lastData.price);
-            document.querySelector('#lg-ma .legend-value').textContent = formatVal(lastData.ma_50);
+            document.querySelector('#lg-ma .legend-value').textContent = formatVal(lastData.ma_20);
             document.querySelector('#lg-boll .legend-value').textContent = formatVal(lastData.boll_upper);
             if (indicators.rsi !== false) {
                 document.querySelector('#lg-rsi .legend-value').textContent = formatVal(lastData.rsi);

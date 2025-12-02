@@ -1,15 +1,16 @@
 class VolumePriceChart {
     static render(data) {
         const chartId = "scatter-chart";
+        console.log(data)
 
-        if (!data || !data.points.volumes || !data.points.changes || !data.points.dates) {
+        if (!data || !data.points.volume || !data.points.change || !data.points.date) {
             this.showErrorState(chartId, "Không có dữ liệu Scatter để hiển thị.");
             return;
         }
 
-        const volumes = data.points.volumes;
-        const changes = data.points.changes; 
-        const dates = data.points.dates;
+        const volumes = data.points.volume;
+        const changes = data.points.change; 
+        const dates = data.points.date;
 
         if (volumes.length !== changes.length) {
             this.showErrorState(chartId, `Lỗi dữ liệu: Volume (${volumes.length}) và Change (${changes.length}) không khớp.`);

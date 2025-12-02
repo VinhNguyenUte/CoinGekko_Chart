@@ -117,8 +117,7 @@
                         <div class="toolbar-section">
                             <span class="section-label">Timeframes</span>
                             <div class="timeframe-group">
-                                <button class="tf-btn active" data-timeframe="1h">1h</button>
-                                <button class="tf-btn" data-timeframe="day">1d</button>
+                                <button class="tf-btn active" data-timeframe="day">1d</button>
                                 <button class="tf-btn" data-timeframe="week">1w</button>
                                 <button class="tf-btn" data-timeframe="month">1m</button>
                             </div>
@@ -167,9 +166,9 @@
                             <h3>Seasonal Cycle (DPO)</h3>
 
                             <div class="seasonal-toolbar">
+                                <button class="dpo-btn" data-config="3">DPO 3</button>
                                 <button class="dpo-btn" data-config="7">DPO 7</button>
-                                <button class="dpo-btn active" data-config="21">DPO 21</button> <button class="dpo-btn"
-                                    data-config="24">DPO 24</button>
+                                <button class="dpo-btn active" data-config="21">DPO 21</button>
                             </div>
                         </div>
                         <div id="seasonal-chart" class="chart-wrapper"></div>
@@ -178,7 +177,7 @@
             </div>
         </main>
     </div>
-    
+
     <script src="js/services/ApiService.js"></script>
 
     <script src="js/charts/DashboardChart.js"></script>
@@ -186,6 +185,8 @@
     <script src="js/charts/VolumePriceChart.js"></script>
     <script src="js/charts/DistributionChart.js"></script>
     <script src="js/charts/SeasonalChart.js"></script>
+
+    <script src="js/app.js"></script>
 </body>
 
 </html>

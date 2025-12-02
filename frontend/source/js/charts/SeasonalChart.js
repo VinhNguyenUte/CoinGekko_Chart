@@ -15,10 +15,10 @@ class SeasonalChart {
             return;
         }
 
-        if (dates.length < 5) {
-            this.showErrorState(chartId, "Dữ liệu quá ít để vẽ biểu đồ.");
-            return;
-        }
+        // if (dates.length < 5) {
+        //     this.showErrorState(chartId, "Dữ liệu quá ít để vẽ biểu đồ.");
+        //     return;
+        // }
 
         this.clearErrorState(chartId);
 
