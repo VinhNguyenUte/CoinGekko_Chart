@@ -6,4 +6,4 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-CMD ["sh", "-c", "while true; do python clustering.py; sleep 86400; done"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002"]

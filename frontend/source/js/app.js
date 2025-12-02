@@ -232,6 +232,7 @@ class App {
       chartDiv.style.opacity = "1";
     }
   }
+  
   startAutoUpdate() {
     this.stopAutoUpdate();
     

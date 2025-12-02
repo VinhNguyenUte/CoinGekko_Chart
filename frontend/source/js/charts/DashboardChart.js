@@ -30,7 +30,7 @@ class DashboardChart {
 
         // Format giá trị hiển thị (2 số thập phân)
         const textValues = matrix.correlations.map(row => row.map(val => val.toFixed(2)));
-        
+
         const trace = {
             z: matrix.correlations,
             x: matrix.coins,
@@ -41,6 +41,7 @@ class DashboardChart {
             zmid: 0,
             zmin: -1,
             zmax: 1,
+
             text: textValues,
             texttemplate: "%{text}",
             textfont: {
@@ -53,6 +54,7 @@ class DashboardChart {
             hovertemplate: "<b>%{y} - %{x}</b><br>Correlation: %{z:.2f}<extra></extra>",
             colorbar: {
                 thickness: 15,
+
                 len: 0.9,
                 tickfont: { color: "#e3e8ef" },
                 titlefont: { color: "#e3e8ef" }
@@ -115,4 +117,5 @@ class DashboardChart {
             </div>
         `;
     }
+
 }

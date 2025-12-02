@@ -12,11 +12,15 @@ from datetime import datetime
 # ------------------------
 # Config & Logging
 # ------------------------
+COINGECKO_API_KEY = "CG-wZsMMjrCVZLoEaYqRUxLjDrS"
+
 headers = {
-    "User-Agent": "Mozilla/5.0",
-    "Accept": "application/json"
+    "User-Agent": "Mozilla/5.0 (RateLimitTester)", 
+    "Accept": "application/json",
+    "x-cg-demo-api-key": COINGECKO_API_KEY 
 }
 
+#
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -24,7 +28,7 @@ logging.basicConfig(
 )
 
 TOP_5_URL = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,dogecoin,tether"
-HISTORY_URL = "https://api.coingecko.com/api/v3/coins/{coin}/market_chart?vs_currency=usd&days=30"
+HISTORY_URL = "https://api.coingecko.com/api/v3/coins/{coin}/market_chart?vs_currency=usd&days=180"
 CALL_INTERVAL_MINUTES = int(os.getenv("CALL_INTERVAL_MINUTES", "5"))
 
 # Retry session
@@ -119,21 +123,30 @@ def create_tables():
         """)
 
         cur.execute("""
-            CREATE TABLE IF NOT EXISTS price_history_weekly (
+            CREATE TABLE IF NOT EXISTS price_resampling (
                 id SERIAL PRIMARY KEY,
                 coin_id TEXT REFERENCES coins(id),
-                week_start_date DATE,
-                weekly_avg_price DOUBLE PRECISION,
-                weekly_max_price DOUBLE PRECISION,
-                weekly_min_price DOUBLE PRECISION,
-                weekly_total_volume BIGINT,
-                weekly_avg_mkt_cap BIGINT
+                timestamp TIMESTAMP NULL,
+                current_price DOUBLE PRECISION NULL,
+                price_max DOUBLE PRECISION NULL,
+                price_min DOUBLE PRECISION NULL,
+                upper_band DOUBLE PRECISION NULL,
+                lower_band DOUBLE PRECISION NULL,
+                price_rsi DOUBLE PRECISION NULL,
+                market_cap BIGINT NULL,
+                total_volume BIGINT NULL,
+                type TEXT DEFAULT 'day'
             );
         """)
 
         cur.execute("""
+            ALTER TABLE price_resampling
+            ADD CONSTRAINT unique_coin UNIQUE (coin_id, timestamp, type);
+        """)
+
+        cur.execute("""
             DELETE FROM price_history
-            WHERE timestamp < NOW() - INTERVAL '30 days'
+            WHERE timestamp < NOW() - INTERVAL '180 days'
         """)
 
 

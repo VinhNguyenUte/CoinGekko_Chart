@@ -60,7 +60,6 @@ class TradingChart {
         });
 
         const bollVisible = indicators.boll ? true : 'legendonly';
-
         traces.push({
             x: dates, y: bollUp,
             name: "BOLL_UP", type: "scatter", mode: "lines",
@@ -70,7 +69,6 @@ class TradingChart {
             showlegend: false,
             visible: bollVisible
         });
-
         traces.push({
             x: dates, y: bollLow,
             name: "BOLL_DN", type: "scatter", mode: "lines",
@@ -111,7 +109,7 @@ class TradingChart {
             margin: { l: 10, r: 60, t: 10, b: 30 },
             paper_bgcolor: "transparent", plot_bgcolor: "transparent",
             showlegend: false,
-            shapes: (isValidIndicator(rsi) && indicators.rsi !== false) ? [
+            shapes: indicators.rsi !== false ? [
                 { type: "line", xref: "paper", x0: 0, x1: 1, yref: "y2", y0: 70, y1: 70, line: { color: "rgba(255,255,255,0.3)", width: 1, dash: "dot" } },
                 { type: "line", xref: "paper", x0: 0, x1: 1, yref: "y2", y0: 30, y1: 30, line: { color: "rgba(255,255,255,0.3)", width: 1, dash: "dot" } }
             ] : []
@@ -139,7 +137,6 @@ class TradingChart {
             if (val === null || val === undefined) return 'N/A';
             return typeof val === 'number' ? val.toFixed(2) : val;
         };
-
         const createItem = (id, label, value, color, isVisible) => `
             <span class="legend-item ${isVisible ? '' : 'hidden'}" id="${id}" style="color: ${color}">
                 <span class="legend-label">${label}</span>
