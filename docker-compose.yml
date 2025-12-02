@@ -85,7 +85,19 @@ services:
     networks:
       - appnet
     
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "5501:80"
+   
+    depends_on:
+      postgres:
+        condition: service_healthy
 
+        
+    networks:
+      - appnet
 
 networks:
   appnet:
