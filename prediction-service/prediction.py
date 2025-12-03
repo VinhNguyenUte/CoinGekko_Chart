@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import threading
 import uvicorn
+
 from fastapi import FastAPI, BackgroundTasks
 from datetime import datetime, timedelta
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
@@ -96,6 +97,8 @@ def ensure_schema_exists():
 
 # Tính các features từ dữ liệu lịch sử 
 def calculate_features(df):
+    df = df.sort_values(by='timestamp', ascending=True).reset_index(drop=True)
+
     try:
         # Price Features
         df['ma7'] = df['current_price'].rolling(window=7).mean()
@@ -123,7 +126,8 @@ def calculate_features(df):
         df['next_day_price'] = df['current_price'].shift(-1)
         df['target_trend'] = (df['next_day_price'] > df['current_price']).astype(int)
         
-        df.fillna(0, inplace=True)
+        df.dropna(subset=['ma20', 'rsi', 'lag_7', 'vol_ma7'], inplace=True)
+
         return df
     except Exception as e:
         logging.error(f"Feature Calculation Error: {e}")
@@ -135,11 +139,15 @@ def get_historical_data(coin_id):
     if not conn: return None
     try:
         query = """
-            SELECT timestamp, current_price, market_cap, total_volume 
+            SELECT DISTINCT ON ("timestamp"::date)
+                "timestamp", 
+                current_price, 
+                market_cap, 
+                total_volume 
             FROM price_history 
             WHERE coin_id = %s 
-            ORDER BY timestamp ASC 
-            LIMIT 365
+              AND "timestamp" >= NOW() - INTERVAL '365 days'
+            ORDER BY "timestamp"::date ASC, "timestamp" DESC
         """
         df = pd.read_sql_query(query, conn, params=(coin_id,))
         if 'timestamp' in df.columns:
@@ -187,7 +195,7 @@ FEATURES = [
 # 1. TRAINING TASK
 # ==============================================================================
 def run_training_task():
-    logging.info(">>> 🏋️ STARTING MODEL TRAINING TASK...")
+    logging.info(">>> STARTING MODEL TRAINING TASK...")
     ensure_schema_exists()
     
     for coin in TARGET_COINS:
@@ -198,8 +206,8 @@ def run_training_task():
 
         df = calculate_features(df)
         
-        # Bỏ dòng cuối cùng (vì chưa có target next_day_price) để train
-        df_train = df.iloc[:-1].copy()
+        # Bỏ dòng cuối cùng
+        df_train = df.dropna(subset=['next_day_price']).copy()
         if len(df_train) < 20: continue
 
         X_train = df_train[FEATURES]
@@ -219,20 +227,19 @@ def run_training_task():
             clf_model = RandomForestClassifier(n_estimators=100, random_state=42)
             clf_model.fit(X_train, y_trend)
             joblib.dump(clf_model, clf_path)
-            logging.info(f"💾 Saved Trend Model: {coin}")
+            logging.info(f"Đã lưu model cho {coin}")
 
         except Exception as e:
-            logging.error(f"Training Error {coin}: {e}")
+            logging.error(f"Train thất bại {coin}: {e}")
 
-    logging.info(">>> ✅ TRAINING FINISHED.")
+    logging.info("TRAINING Thành công.")
 
 # ==============================================================================
 # 2. PREDICTION TASK
 # ==============================================================================
 def run_prediction_task():
-    logging.info(">>> 🔮 STARTING PREDICTION TASK...")
+    logging.info(">>> STARTING PREDICTION TASK...")
     ensure_schema_exists()
-    
     for coin in TARGET_COINS:
         reg_path = os.path.join(MODEL_DIR, f"{coin}_price.pkl")
         clf_path = os.path.join(MODEL_DIR, f"{coin}_trend.pkl")
@@ -246,6 +253,10 @@ def run_prediction_task():
         df = calculate_features(df)
         
         last_row = df.iloc[[-1]]
+        # KIỂM TRA DỮ LIỆU ĐẦY ĐỦ
+        if last_row[FEATURES].isnull().values.any():
+            logging.warning(f"Skipping {coin}: Dữ liệu ngày mới nhất chưa đủ để tính chỉ báo.")
+            continue
         X_pred = last_row[FEATURES]
         
         # LẤY GIÁ HIỆN TẠI TỪ DỮ LIỆU
@@ -260,10 +271,35 @@ def run_prediction_task():
             pred_proba = clf_model.predict_proba(X_pred)[0]
             confidence = max(pred_proba) * 100
             
-            if pred_class == 1:
-                signal = "BUY"; trend_text = "UP"
-            else:
-                signal = "SELL"; trend_text = "DOWN"
+            # ... (Đoạn lấy current_price và predicted_price)
+
+            # 1. Tính % lợi nhuận kỳ vọng
+            price_change_pct = ((predicted_price - current_price) / current_price) * 100
+
+            # 2. Ngưỡng tối thiểu để vào lệnh (Ví dụ: phải lãi hơn phí sàn 0.1% + trượt giá)
+            MIN_PROFIT_THRESHOLD = 0.5  # 0.5%
+
+            # 3. Logic ra quyết định
+            if pred_class == 1: # Classifier bảo TĂNG
+                if price_change_pct >= MIN_PROFIT_THRESHOLD:
+                    signal = "STRONG BUY"
+                    trend_text = f"UP (+{price_change_pct:.2f}%)"
+                elif price_change_pct > 0:
+                    signal = "WEAK BUY" # Tăng nhưng không đủ bù phí
+                    trend_text = f"UP (Only +{price_change_pct:.2f}%)"
+                else:
+                    signal = "CONFLICT" # Classifier bảo Tăng mà Giá dự đoán lại Giảm
+                    trend_text = f"Trend: {'UP' if pred_class == 1 else 'DOWN'} but Price Change: {price_change_pct:.2f}%"
+
+            elif pred_class == 0: # Classifier bảo GIẢM
+                if price_change_pct <= -MIN_PROFIT_THRESHOLD:
+                    signal = "STRONG SELL"
+                    trend_text = f"DOWN ({price_change_pct:.2f}%)"
+                else:
+                    signal = "NEUTRAL" # Giảm nhưng không đủ để vào lệnh
+                    trend_text = "Sideway"
+
+            # ... (Lưu signal và trend_text vào DB)
             
             try:
                 importances = clf_model.feature_importances_
@@ -272,7 +308,7 @@ def run_prediction_task():
             except:
                 top_feature = "Unknown"
 
-            factors = f"AI Model: {trend_text} | Key: {top_feature}"
+            factors = f"Trend: {trend_text} | Key: {top_feature}"
             
             # TRUYỀN current_price VÀO HÀM SAVE
             save_to_db(coin, current_price, predicted_price, signal, confidence, factors)
@@ -302,15 +338,16 @@ def run_scheduler():
         time.sleep(1)
 
 if __name__ == "__main__":
+    time.sleep(8) 
     try:
         test_path = os.path.join(MODEL_DIR, f"{TARGET_COINS[0]}_price.pkl")
         if not os.path.exists(test_path):
-            logging.info("🚀 First run detected (no models). Starting initial training...")
+            logging.info("First run detected (no models). Starting initial training...")
             t_train = threading.Thread(target=run_training_task)
             t_train.start()
             t_train.join()
         else:
-            logging.info("🚀 First run detected (models exist). Starting server...")
+            logging.info("First run detected (models exist). Starting server...")
             # Chạy trong thread riêng để không block việc start uvicorn
             run_prediction_task()
     except Exception as e:
